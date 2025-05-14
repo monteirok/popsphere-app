@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { getInitials } from "@/lib/utils";
+import { useTheme } from "@/components/theme-provider";
 import FollowersModal from "@/components/profile/FollowersModal";
 import { 
   Edit, 
@@ -16,7 +17,11 @@ import {
   Users, 
   User as UserIcon,
   Camera,
-  LogOut
+  LogOut,
+  Settings,
+  Sun,
+  Moon,
+  Computer
 } from "lucide-react";
 import {
   Dialog,
@@ -37,6 +42,7 @@ export default function Profile() {
   const { username } = useParams<{ username?: string }>();
   const { user: currentUser, logout } = useAuth();
   const { toast } = useToast();
+  const { theme, setTheme } = useTheme();
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
   
@@ -213,7 +219,7 @@ export default function Profile() {
   
   return (
     <div className="max-w-4xl mx-auto">
-      <div className="bg-white rounded-custom p-6 shadow-soft mb-6">
+      <div className="bg-white dark:bg-gray-800 rounded-custom p-6 shadow-soft mb-6">
         <div className="flex flex-col md:flex-row items-center md:items-start">
           <Avatar className="h-24 w-24 rounded-full mb-4 md:mb-0 md:mr-6 border-2 border-pop-pink">
             <AvatarImage src={profileUser?.profileImage} alt={profileUser?.displayName} />
@@ -373,6 +379,14 @@ export default function Profile() {
             >
               <UserIcon className="h-4 w-4 mr-2" /> Following
             </TabsTrigger>
+            {isOwnProfile && (
+              <TabsTrigger 
+                value="settings" 
+                className="data-[state=active]:bg-pop-pink data-[state=active]:text-white rounded-full px-4 py-2"
+              >
+                <Settings className="h-4 w-4 mr-2" /> Settings
+              </TabsTrigger>
+            )}
           </TabsList>
         </div>
         
@@ -494,6 +508,65 @@ export default function Profile() {
             )}
           </div>
         </TabsContent>
+
+        {isOwnProfile && (
+          <TabsContent value="settings" className="mt-0">
+            <div className="bg-white dark:bg-gray-800 rounded-custom p-4 shadow-soft">
+              <h2 className="text-xl font-bold mb-4">Settings</h2>
+              
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">Theme Preferences</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Choose how PopSphere looks to you</p>
+                  
+                  <div className="flex flex-col space-y-3">
+                    <div 
+                      className={`p-3 border rounded-lg flex items-center justify-between cursor-pointer hover:border-pop-pink ${theme === 'light' ? 'border-pop-pink bg-pink-50 dark:bg-pink-900/20' : 'border-gray-200 dark:border-gray-700'}`}
+                      onClick={() => setTheme('light')}
+                    >
+                      <div className="flex items-center">
+                        <Sun className="h-5 w-5 mr-3 text-amber-500" />
+                        <div>
+                          <p className="font-medium">Light</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">Use the light theme</p>
+                        </div>
+                      </div>
+                      {theme === 'light' && <div className="h-3 w-3 rounded-full bg-pop-pink"></div>}
+                    </div>
+                    
+                    <div 
+                      className={`p-3 border rounded-lg flex items-center justify-between cursor-pointer hover:border-pop-pink ${theme === 'dark' ? 'border-pop-pink bg-pink-50 dark:bg-pink-900/20' : 'border-gray-200 dark:border-gray-700'}`}
+                      onClick={() => setTheme('dark')}
+                    >
+                      <div className="flex items-center">
+                        <Moon className="h-5 w-5 mr-3 text-indigo-500" />
+                        <div>
+                          <p className="font-medium">Dark</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">Use the dark theme</p>
+                        </div>
+                      </div>
+                      {theme === 'dark' && <div className="h-3 w-3 rounded-full bg-pop-pink"></div>}
+                    </div>
+                    
+                    <div 
+                      className={`p-3 border rounded-lg flex items-center justify-between cursor-pointer hover:border-pop-pink ${theme === 'system' ? 'border-pop-pink bg-pink-50 dark:bg-pink-900/20' : 'border-gray-200 dark:border-gray-700'}`}
+                      onClick={() => setTheme('system')}
+                    >
+                      <div className="flex items-center">
+                        <Computer className="h-5 w-5 mr-3 text-blue-500" />
+                        <div>
+                          <p className="font-medium">System</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">Match your system preferences</p>
+                        </div>
+                      </div>
+                      {theme === 'system' && <div className="h-3 w-3 rounded-full bg-pop-pink"></div>}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+        )}
       </Tabs>
       
       {/* Followers/Following Modal */}
