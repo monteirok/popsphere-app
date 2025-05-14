@@ -95,7 +95,7 @@ export default function FollowersModal({
     const isCurrentUser = currentUser?.id === userData.id;
     
     return (
-      <div key={userData.id} className="flex items-center justify-between p-3 border-b border-gray-100 last:border-0">
+      <div key={userData.id} className="flex items-center justify-between p-3 border-b border-gray-100 dark:border-gray-700 last:border-0">
         <div 
           className="flex items-center flex-1 cursor-pointer" 
           onClick={() => goToProfile(userData.username)}
@@ -106,7 +106,7 @@ export default function FollowersModal({
           </Avatar>
           <div>
             <div className="font-semibold">{userData.displayName || userData.username}</div>
-            <div className="text-xs text-gray-500">@{userData.username}</div>
+            <div className="text-xs text-gray-500 dark:text-gray-400">@{userData.username}</div>
           </div>
         </div>
         
@@ -154,11 +154,11 @@ export default function FollowersModal({
           </TabsList>
           
           <TabsContent value="followers" className="flex-1 overflow-auto">
-            <div className="space-y-0 divide-y divide-gray-100">
+            <div className="space-y-0 divide-y divide-gray-100 dark:divide-gray-700">
               {followers.length > 0 ? (
                 followers.map(follower => renderUserItem(follower))
               ) : (
-                <div className="py-8 text-center text-gray-500">
+                <div className="py-8 text-center text-gray-500 dark:text-gray-400">
                   <p>{isOwnProfile ? "You don't" : `${username} doesn't`} have any followers yet.</p>
                 </div>
               )}
@@ -166,7 +166,7 @@ export default function FollowersModal({
           </TabsContent>
           
           <TabsContent value="following" className="flex-1 overflow-auto">
-            <div className="space-y-0 divide-y divide-gray-100">
+            <div className="space-y-0 divide-y divide-gray-100 dark:divide-gray-700">
               {following.length > 0 ? (
                 following.map(followedUser => renderUserItem(followedUser, true))
               ) : (

@@ -251,7 +251,7 @@ export default function Profile() {
                 onClick={() => setIsFollowersModalOpen(true)}
               >
                 <div className="text-lg font-bold">{following.length}</div>
-                <div className="text-xs text-gray-500">Following</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">Following</div>
               </div>
             </div>
           </div>
