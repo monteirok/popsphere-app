@@ -1,13 +1,52 @@
+import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "wouter";
-import { Search, Bell, MessageSquare } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { useAuth } from "@/hooks/use-auth";
+import { Search, Bell, MessageSquare, User, X } from "lucide-react";
+import { Input } from "../ui/input";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { Button } from "../ui/button";
+import { useAuth } from "../../hooks/use-auth";
+import { useQuery } from "@tanstack/react-query";
+import { apiRequest } from "../../lib/queryClient";
+
+// Define the user interface for search results
+interface SearchUser {
+  id: number;
+  username: string;
+  displayName: string;
+  profileImage?: string;
+  bio?: string;
+}
 
 export default function Header() {
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
   const { user, logout } = useAuth();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
+  
+  // Fetch search results when query changes
+  const {
+    data: searchResults = [],
+    isLoading,
+    error
+  } = useQuery<SearchUser[]>({
+    queryKey: [`/api/users/search?q=${searchQuery}`],
+    enabled: searchQuery.length >= 2,
+  });
+  
+  // Close search results when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setIsSearchFocused(false);
+      }
+    }
+    
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
   
   const getInitials = (name: string) => {
     return name
@@ -15,6 +54,28 @@ export default function Header() {
       .map(n => n[0])
       .join('')
       .toUpperCase();
+  };
+  
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    if (e.target.value.length > 0) {
+      setIsSearchFocused(true);
+    }
+  };
+  
+  const handleSearchClick = () => {
+    setIsSearchFocused(true);
+  };
+  
+  const clearSearch = () => {
+    setSearchQuery("");
+    setIsSearchFocused(false);
+  };
+  
+  const handleUserClick = (userId: number, username: string) => {
+    setLocation(`/profile/${username}`);
+    setIsSearchFocused(false);
+    setSearchQuery("");
   };
   
   return (
@@ -27,14 +88,75 @@ export default function Header() {
           <span className="bg-pop-pink text-white text-xs px-2 py-1 rounded-full">BETA</span>
         </div>
         
-        <div className="hidden md:flex flex-grow max-w-md mx-4">
+        <div className="hidden md:flex flex-grow max-w-md mx-4" ref={searchRef}>
           <div className="relative w-full">
             <Input 
               type="text" 
-              placeholder="Search collections, users or items..." 
+              placeholder="Search users by name or username..." 
               className="w-full bg-gray-100 rounded-full py-2 px-4 pl-10 focus:outline-none focus:ring-2 focus:ring-pop-pink text-sm"
+              value={searchQuery}
+              onChange={handleSearchChange}
+              onClick={handleSearchClick}
             />
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+            {searchQuery && (
+              <button 
+                className="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600"
+                onClick={clearSearch}
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+            
+            {/* Search Results Dropdown */}
+            {isSearchFocused && searchQuery.length >= 2 && (
+              <div className="absolute top-12 left-0 right-0 bg-white rounded-lg shadow-lg border z-50 max-h-80 overflow-y-auto">
+                <div className="p-3 border-b">
+                  <h3 className="text-sm font-semibold">
+                    {isLoading ? 'Searching...' : `Search results for "${searchQuery}"`}
+                  </h3>
+                </div>
+                
+                {isLoading ? (
+                  <div className="p-4 text-center">
+                    <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-pop-pink mx-auto"></div>
+                  </div>
+                ) : searchResults.length === 0 ? (
+                  <div className="p-4 text-center text-gray-500">
+                    <User className="h-8 w-8 mx-auto mb-2 text-gray-400" />
+                    <p>No users found matching "{searchQuery}"</p>
+                  </div>
+                ) : (
+                  <ul>
+                    {searchResults.map((result) => (
+                      <li 
+                        key={result.id} 
+                        className="p-3 hover:bg-gray-50 cursor-pointer"
+                        onClick={() => handleUserClick(result.id, result.username)}
+                      >
+                        <div className="flex items-center">
+                          <Avatar className="h-10 w-10 mr-3">
+                            <AvatarImage src={result.profileImage} alt={result.displayName} />
+                            <AvatarFallback>{getInitials(result.displayName)}</AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between">
+                              <p className="text-sm font-medium text-gray-900 truncate">
+                                {result.displayName}
+                              </p>
+                              <span className="text-xs text-gray-500">@{result.username}</span>
+                            </div>
+                            {result.bio && (
+                              <p className="text-xs text-gray-500 truncate">{result.bio}</p>
+                            )}
+                          </div>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )}
           </div>
         </div>
         
