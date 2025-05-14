@@ -171,10 +171,22 @@ export default function TradeCard({ trade, isUserProposer }: TradeCardProps) {
       )}
       
       {trade.status === "accepted" && (
-        <div className="mt-3 p-2 bg-green-50 border border-green-200 rounded-custom text-center text-xs text-green-700">
-          <div className="flex items-center justify-center">
-            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse mr-2"></div>
-            Trade accepted! Coordinate with the other collector to complete the exchange.
+        <div className="mt-3">
+          <div className="p-2 bg-green-50 border border-green-200 rounded-custom text-center text-xs text-green-700">
+            <div className="flex items-center justify-center">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse mr-2"></div>
+              Trade accepted! Coordinate with the other collector to complete the exchange.
+            </div>
+          </div>
+          <div className="flex justify-center mt-2">
+            <Button 
+              onClick={() => updateTradeStatus("completed")}
+              disabled={isPending}
+              size="sm"
+              className="bg-golden-yellow hover:bg-opacity-90 text-white rounded-full px-3 py-1.5 text-xs font-medium transition"
+            >
+              Mark as Completed
+            </Button>
           </div>
         </div>
       )}
@@ -184,6 +196,15 @@ export default function TradeCard({ trade, isUserProposer }: TradeCardProps) {
           <div className="flex items-center justify-center">
             <div className="w-2 h-2 bg-red-500 rounded-full mr-2"></div>
             Trade declined. Better luck next time!
+          </div>
+        </div>
+      )}
+      
+      {trade.status === "completed" && (
+        <div className="mt-3 p-2 bg-amber-50 border border-amber-200 rounded-custom text-center text-xs text-amber-700">
+          <div className="flex items-center justify-center">
+            <div className="w-2 h-2 bg-golden-yellow rounded-full mr-2"></div>
+            Trade successfully completed!
           </div>
         </div>
       )}

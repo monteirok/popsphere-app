@@ -44,14 +44,14 @@ export default function Collection() {
 
 // Active Trades Widget Component
 function ActiveTradesWidget({ userId }: { userId: number }) {
-  const { data: trades = [], isLoading } = useQuery({
+  const { data: trades = [], isLoading } = useQuery<any[]>({
     queryKey: ["/api/trades"],
     refetchInterval: 10000, // Auto refresh every 10 seconds
   });
   
   // Filter to only pending trades and limit to 2
   const pendingTrades = (trades as any[])
-    .filter((trade) => trade.status === "pending")
+    .filter(trade => trade.status === "pending")
     .slice(0, 2);
   
   return (
