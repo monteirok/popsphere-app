@@ -1,16 +1,41 @@
-import {
-  users, User, InsertUser,
-  collectibles, Collectible, InsertCollectible,
-  trades, Trade, InsertTrade,
-  posts, Post, InsertPost,
-  likes, Like, InsertLike,
-  comments, Comment, InsertComment,
-  follows, Follow, InsertFollow,
-  CollectibleWithUser, TradeWithDetails, PostWithDetails
-} from "@shared/schema";
+import { db } from './db';
+import { 
+  users, 
+  collectibles, 
+  trades, 
+  posts, 
+  likes, 
+  comments, 
+  follows,
+  User,
+  Collectible,
+  Trade,
+  Post,
+  Comment,
+  Like,
+  Follow,
+  InsertUser,
+  InsertCollectible,
+  InsertTrade,
+  InsertPost,
+  InsertComment,
+  InsertLike,
+  InsertFollow,
+  CollectibleWithUser,
+  TradeWithDetails,
+  PostWithDetails 
+} from '@shared/schema';
+import { eq, and, or, desc, asc, sql, inArray } from 'drizzle-orm';
+import connectPg from "connect-pg-simple";
+import session from "express-session";
+import { alias } from 'drizzle-orm/pg-core';
 
-// Define the storage interface with CRUD operations
+const PostgresSessionStore = connectPg(session);
+
 export interface IStorage {
+  // Session store for user authentication
+  sessionStore: session.Store;
+
   // User operations
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
@@ -65,226 +90,190 @@ export interface IStorage {
   getRecommendedUsers(userId: number): Promise<User[]>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  private collectibles: Map<number, Collectible>;
-  private trades: Map<number, Trade>;
-  private posts: Map<number, Post>;
-  private likes: Map<number, Like>;
-  private comments: Map<number, Comment>;
-  private follows: Map<number, Follow>;
-  
-  private userId: number;
-  private collectibleId: number;
-  private tradeId: number;
-  private postId: number;
-  private likeId: number;
-  private commentId: number;
-  private followId: number;
+export class DatabaseStorage implements IStorage {
+  sessionStore: session.Store;
 
   constructor() {
-    this.users = new Map();
-    this.collectibles = new Map();
-    this.trades = new Map();
-    this.posts = new Map();
-    this.likes = new Map();
-    this.comments = new Map();
-    this.follows = new Map();
-    
-    this.userId = 1;
-    this.collectibleId = 1;
-    this.tradeId = 1;
-    this.postId = 1;
-    this.likeId = 1;
-    this.commentId = 1;
-    this.followId = 1;
-    
-    // Initialize with sample data
-    this.initializeData();
-  }
-
-  private initializeData() {
-    // Create demo users
-    const user1 = this.createUser({
-      username: 'johndoe',
-      password: 'password123',
-      email: 'john@example.com',
-      displayName: 'John Doe',
-      bio: 'PopMart collector since 2020',
-      profileImage: 'https://images.unsplash.com/photo-1517841905240-472988babdf9'
-    });
-    
-    const user2 = this.createUser({
-      username: 'janedoe',
-      password: 'password123',
-      email: 'jane@example.com',
-      displayName: 'Jane Doe',
-      bio: 'Collecting cute figures is my passion',
-      profileImage: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb'
-    });
-    
-    // Add some collectibles
-    this.createCollectible({
-      userId: user1.id,
-      name: 'Dimoo Candy Series',
-      series: 'Dimoo',
-      variant: 'Strawberry Dream',
-      rarity: 'rare',
-      image: 'https://pixabay.com/get/ge2e2feeb6d154376f5b096a59f55815948fa2d5589d58f822ce7e9532c6d1a6d78fddd2f01baf36a15d4b3f923041d48291cc569a5eb9a9ec23bf426bb9b6240_1280.jpg',
-      description: 'A cute pink Dimoo with strawberry theme',
-      forTrade: true
-    });
-    
-    this.createCollectible({
-      userId: user1.id,
-      name: 'Skullpanda Space',
-      series: 'Skullpanda',
-      variant: 'Cosmic Explorer',
-      rarity: 'common',
-      image: 'https://images.unsplash.com/photo-1598541264502-84dc6aa2fb87',
-      description: 'Skullpanda with space theme',
-      forTrade: true
-    });
-    
-    this.createCollectible({
-      userId: user2.id,
-      name: 'Molly Ocean Series',
-      series: 'Molly',
-      variant: 'Coral Guardian',
-      rarity: 'ultra-rare',
-      image: 'https://images.unsplash.com/photo-1581557991964-125469da3b8a',
-      description: 'Molly with ocean theme',
-      forTrade: true
-    });
-    
-    // Create some posts
-    this.createPost({
-      userId: user1.id,
-      content: 'Just added the new Molly Ocean Series to my collection! So excited to have completed the set! 🎉',
-      images: ['https://images.unsplash.com/photo-1581557991964-125469da3b8a', 'https://pixabay.com/get/g8a02240ad8e3bd3a93c22c79cf6be25064d2e0285442774e722323b316975c059d2541708fdabcc28834b52a2fd85b096f7879c38b9a5bd5dd496a3a3f490c18_1280.jpg']
-    });
-    
-    this.createPost({
-      userId: user2.id,
-      content: 'Went to the PopMart event today and scored this limited edition Dimoo! Anyone want to trade?',
-      images: ['https://pixabay.com/get/gf4e840ac42e9740b2a302024beb929eee0f10ec849670dfcf09a7664157319178e3d8644cc6176599932fb5b28ca8a318b3b16309601e3b6c4e4abf356ccd614_1280.jpg']
+    this.sessionStore = new PostgresSessionStore({
+      pool: db.$client,
+      createTableIfMissing: true
     });
   }
 
   // User operations
   async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(user => user.username === username);
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user;
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(user => user.email === email);
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user;
   }
 
   async createUser(userData: InsertUser): Promise<User> {
-    const id = this.userId++;
-    const now = new Date();
-    const user: User = { ...userData, id, joinedAt: now };
-    this.users.set(id, user);
+    const [user] = await db.insert(users).values(userData).returning();
     return user;
   }
 
   async updateUser(id: number, data: Partial<User>): Promise<User | undefined> {
-    const user = await this.getUser(id);
-    if (!user) return undefined;
-    
-    const updatedUser = { ...user, ...data };
-    this.users.set(id, updatedUser);
+    const [updatedUser] = await db
+      .update(users)
+      .set(data)
+      .where(eq(users.id, id))
+      .returning();
     return updatedUser;
   }
 
   async getAllUsers(): Promise<User[]> {
-    return Array.from(this.users.values());
+    return db.select().from(users);
   }
 
   async searchUsers(query: string): Promise<User[]> {
-    const lowerQuery = query.toLowerCase();
-    return Array.from(this.users.values()).filter(
-      user => 
-        user.username.toLowerCase().includes(lowerQuery) || 
-        user.displayName.toLowerCase().includes(lowerQuery)
-    );
+    return db
+      .select()
+      .from(users)
+      .where(
+        or(
+          sql`${users.username} ILIKE ${`%${query}%`}`,
+          sql`${users.displayName} ILIKE ${`%${query}%`}`
+        )
+      );
   }
 
   // Collectible operations
   async getCollectible(id: number): Promise<Collectible | undefined> {
-    return this.collectibles.get(id);
+    const [collectible] = await db
+      .select()
+      .from(collectibles)
+      .where(eq(collectibles.id, id));
+    return collectible;
   }
 
   async getUserCollectibles(userId: number): Promise<Collectible[]> {
-    return Array.from(this.collectibles.values()).filter(
-      collectible => collectible.userId === userId
-    );
+    return db
+      .select()
+      .from(collectibles)
+      .where(eq(collectibles.userId, userId));
   }
 
   async createCollectible(collectibleData: InsertCollectible): Promise<Collectible> {
-    const id = this.collectibleId++;
-    const now = new Date();
-    const collectible: Collectible = { ...collectibleData, id, addedAt: now };
-    this.collectibles.set(id, collectible);
+    const [collectible] = await db
+      .insert(collectibles)
+      .values({
+        ...collectibleData,
+        description: collectibleData.description || null,
+        forTrade: collectibleData.forTrade || false
+      })
+      .returning();
     return collectible;
   }
 
   async updateCollectible(id: number, data: Partial<Collectible>): Promise<Collectible | undefined> {
-    const collectible = await this.getCollectible(id);
-    if (!collectible) return undefined;
-    
-    const updatedCollectible = { ...collectible, ...data };
-    this.collectibles.set(id, updatedCollectible);
+    const [updatedCollectible] = await db
+      .update(collectibles)
+      .set(data)
+      .where(eq(collectibles.id, id))
+      .returning();
     return updatedCollectible;
   }
 
   async deleteCollectible(id: number): Promise<boolean> {
-    return this.collectibles.delete(id);
+    const result = await db
+      .delete(collectibles)
+      .where(eq(collectibles.id, id));
+    return true;
   }
 
   async getCollectiblesForTrade(): Promise<CollectibleWithUser[]> {
-    const collectiblesForTrade = Array.from(this.collectibles.values())
-      .filter(collectible => collectible.forTrade);
-    
-    return Promise.all(collectiblesForTrade.map(async collectible => {
-      const user = await this.getUser(collectible.userId);
-      return {
-        ...collectible,
-        user: user!
-      };
+    const result = await db
+      .select({
+        collectible: collectibles,
+        user: {
+          id: users.id,
+          username: users.username,
+          displayName: users.displayName,
+          profileImage: users.profileImage
+        }
+      })
+      .from(collectibles)
+      .innerJoin(users, eq(collectibles.userId, users.id))
+      .where(eq(collectibles.forTrade, true));
+
+    return result.map(({ collectible, user }) => ({
+      ...collectible,
+      user: {
+        ...user,
+        password: '', // Ensure password is never exposed
+        email: '',    // Ensure email is never exposed
+        bio: null,
+        joinedAt: new Date()
+      }
     }));
   }
 
   async searchCollectibles(query: string): Promise<Collectible[]> {
-    const lowerQuery = query.toLowerCase();
-    return Array.from(this.collectibles.values()).filter(
-      collectible => 
-        collectible.name.toLowerCase().includes(lowerQuery) || 
-        collectible.series.toLowerCase().includes(lowerQuery) || 
-        collectible.variant.toLowerCase().includes(lowerQuery)
-    );
+    return db
+      .select()
+      .from(collectibles)
+      .where(
+        or(
+          sql`${collectibles.name} ILIKE ${`%${query}%`}`,
+          sql`${collectibles.variant} ILIKE ${`%${query}%`}`,
+          sql`${collectibles.series} ILIKE ${`%${query}%`}`
+        )
+      );
   }
 
   // Trade operations
   async getTrade(id: number): Promise<Trade | undefined> {
-    return this.trades.get(id);
+    const [trade] = await db
+      .select()
+      .from(trades)
+      .where(eq(trades.id, id));
+    return trade;
   }
 
   async getTradeWithDetails(id: number): Promise<TradeWithDetails | undefined> {
-    const trade = await this.getTrade(id);
-    if (!trade) return undefined;
-    
-    const proposer = await this.getUser(trade.proposerId);
-    const receiver = await this.getUser(trade.receiverId);
-    const proposerCollectible = await this.getCollectible(trade.proposerCollectibleId);
-    const receiverCollectible = await this.getCollectible(trade.receiverCollectibleId);
-    
-    if (!proposer || !receiver || !proposerCollectible || !receiverCollectible) return undefined;
-    
+    // Create aliases for tables to resolve circular reference issues
+    const proposerUserTable = alias(users, 'proposerUser');
+    const receiverUserTable = alias(users, 'receiverUser');
+    const proposerCollectibleTable = alias(collectibles, 'proposerCollectible');
+    const receiverCollectibleTable = alias(collectibles, 'receiverCollectible');
+
+    const result = await db
+      .select({
+        trade: trades,
+        proposer: {
+          id: proposerUserTable.id,
+          username: proposerUserTable.username,
+          displayName: proposerUserTable.displayName,
+          profileImage: proposerUserTable.profileImage
+        },
+        receiver: {
+          id: receiverUserTable.id,
+          username: receiverUserTable.username,
+          displayName: receiverUserTable.displayName,
+          profileImage: receiverUserTable.profileImage
+        },
+        proposerCollectible: proposerCollectibleTable,
+        receiverCollectible: receiverCollectibleTable
+      })
+      .from(trades)
+      .innerJoin(proposerUserTable, eq(trades.proposerId, proposerUserTable.id))
+      .innerJoin(receiverUserTable, eq(trades.receiverId, receiverUserTable.id))
+      .innerJoin(proposerCollectibleTable, eq(trades.proposerCollectibleId, proposerCollectibleTable.id))
+      .innerJoin(receiverCollectibleTable, eq(trades.receiverCollectibleId, receiverCollectibleTable.id))
+      .where(eq(trades.id, id));
+
+    if (result.length === 0) return undefined;
+
+    const { trade, proposer, receiver, proposerCollectible, receiverCollectible } = result[0];
     return {
       ...trade,
       proposer,
@@ -295,227 +284,384 @@ export class MemStorage implements IStorage {
   }
 
   async getUserTrades(userId: number): Promise<Trade[]> {
-    return Array.from(this.trades.values()).filter(
-      trade => trade.proposerId === userId || trade.receiverId === userId
-    );
+    return db
+      .select()
+      .from(trades)
+      .where(
+        or(
+          eq(trades.proposerId, userId),
+          eq(trades.receiverId, userId)
+        )
+      );
   }
 
   async getUserTradesWithDetails(userId: number): Promise<TradeWithDetails[]> {
-    const trades = await this.getUserTrades(userId);
-    
-    return Promise.all(trades.map(async trade => {
-      const proposer = await this.getUser(trade.proposerId);
-      const receiver = await this.getUser(trade.receiverId);
-      const proposerCollectible = await this.getCollectible(trade.proposerCollectibleId);
-      const receiverCollectible = await this.getCollectible(trade.receiverCollectibleId);
-      
-      if (!proposer || !receiver || !proposerCollectible || !receiverCollectible) {
-        throw new Error('Missing related data for trade');
-      }
-      
-      return {
-        ...trade,
-        proposer,
-        receiver,
-        proposerCollectible,
-        receiverCollectible
-      };
+    // Create aliases for tables
+    const proposerUserTable = alias(users, 'proposerUser');
+    const receiverUserTable = alias(users, 'receiverUser');
+    const proposerCollectibleTable = alias(collectibles, 'proposerCollectible');
+    const receiverCollectibleTable = alias(collectibles, 'receiverCollectible');
+
+    const result = await db
+      .select({
+        trade: trades,
+        proposer: {
+          id: proposerUserTable.id,
+          username: proposerUserTable.username,
+          displayName: proposerUserTable.displayName,
+          profileImage: proposerUserTable.profileImage
+        },
+        receiver: {
+          id: receiverUserTable.id,
+          username: receiverUserTable.username,
+          displayName: receiverUserTable.displayName,
+          profileImage: receiverUserTable.profileImage
+        },
+        proposerCollectible: proposerCollectibleTable,
+        receiverCollectible: receiverCollectibleTable
+      })
+      .from(trades)
+      .innerJoin(proposerUserTable, eq(trades.proposerId, proposerUserTable.id))
+      .innerJoin(receiverUserTable, eq(trades.receiverId, receiverUserTable.id))
+      .innerJoin(proposerCollectibleTable, eq(trades.proposerCollectibleId, proposerCollectibleTable.id))
+      .innerJoin(receiverCollectibleTable, eq(trades.receiverCollectibleId, receiverCollectibleTable.id))
+      .where(
+        or(
+          eq(trades.proposerId, userId),
+          eq(trades.receiverId, userId)
+        )
+      );
+
+    return result.map(({ trade, proposer, receiver, proposerCollectible, receiverCollectible }) => ({
+      ...trade,
+      proposer,
+      receiver,
+      proposerCollectible,
+      receiverCollectible
     }));
   }
 
   async createTrade(tradeData: InsertTrade): Promise<Trade> {
-    const id = this.tradeId++;
-    const now = new Date();
-    const trade: Trade = { 
-      ...tradeData, 
-      id, 
-      status: 'pending', 
-      createdAt: now,
-      updatedAt: now
-    };
-    this.trades.set(id, trade);
+    const [trade] = await db
+      .insert(trades)
+      .values({
+        ...tradeData,
+        message: tradeData.message || null,
+        status: "pending",
+        createdAt: new Date(),
+        updatedAt: new Date()
+      })
+      .returning();
     return trade;
   }
 
   async updateTradeStatus(id: number, status: string): Promise<Trade | undefined> {
-    const trade = await this.getTrade(id);
-    if (!trade) return undefined;
-    
-    const updatedTrade = { 
-      ...trade, 
-      status, 
-      updatedAt: new Date() 
-    };
-    this.trades.set(id, updatedTrade);
+    const [updatedTrade] = await db
+      .update(trades)
+      .set({
+        status,
+        updatedAt: new Date()
+      })
+      .where(eq(trades.id, id))
+      .returning();
     return updatedTrade;
   }
 
   // Post operations
   async getPost(id: number): Promise<Post | undefined> {
-    return this.posts.get(id);
+    const [post] = await db
+      .select()
+      .from(posts)
+      .where(eq(posts.id, id));
+    return post;
   }
 
   async getUserPosts(userId: number): Promise<Post[]> {
-    return Array.from(this.posts.values())
-      .filter(post => post.userId === userId)
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    return db
+      .select()
+      .from(posts)
+      .where(eq(posts.userId, userId))
+      .orderBy(desc(posts.createdAt));
   }
 
   async createPost(postData: InsertPost): Promise<Post> {
-    const id = this.postId++;
-    const now = new Date();
-    const post: Post = { ...postData, id, createdAt: now };
-    this.posts.set(id, post);
+    const [post] = await db
+      .insert(posts)
+      .values({
+        ...postData,
+        images: postData.images || null,
+        createdAt: new Date()
+      })
+      .returning();
     return post;
   }
 
   async deletePost(id: number): Promise<boolean> {
-    // Delete all related likes and comments first
-    const likes = Array.from(this.likes.values()).filter(like => like.postId === id);
-    likes.forEach(like => this.likes.delete(like.id));
+    // Delete associated likes and comments first
+    await db.delete(likes).where(eq(likes.postId, id));
+    await db.delete(comments).where(eq(comments.postId, id));
     
-    const comments = Array.from(this.comments.values()).filter(comment => comment.postId === id);
-    comments.forEach(comment => this.comments.delete(comment.id));
-    
-    return this.posts.delete(id);
+    // Then delete the post
+    await db.delete(posts).where(eq(posts.id, id));
+    return true;
   }
 
   async getFeedPosts(currentUserId?: number): Promise<PostWithDetails[]> {
-    const allPosts = Array.from(this.posts.values())
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-    
-    // Filter out posts with invalid users first to avoid errors
-    const validPosts = [];
-    for (const post of allPosts) {
-      const user = await this.getUser(post.userId);
-      if (user) {
-        validPosts.push({ post, user });
-      }
+    const userLikes = currentUserId 
+      ? db.select().from(likes).where(eq(likes.userId, currentUserId))
+      : [];
+      
+    const result = await db
+      .select({
+        post: posts,
+        user: {
+          id: users.id,
+          username: users.username,
+          displayName: users.displayName,
+          profileImage: users.profileImage
+        },
+        likesCount: sql`count(distinct ${likes.id})::int`,
+        commentsCount: sql`count(distinct ${comments.id})::int`
+      })
+      .from(posts)
+      .leftJoin(likes, eq(posts.id, likes.postId))
+      .leftJoin(comments, eq(posts.id, comments.postId))
+      .innerJoin(users, eq(posts.userId, users.id))
+      .groupBy(posts.id, users.id)
+      .orderBy(desc(posts.createdAt));
+
+    const likesMap = new Map();
+    if (currentUserId) {
+      const userLikes = await db
+        .select()
+        .from(likes)
+        .where(eq(likes.userId, currentUserId));
+      
+      userLikes.forEach(like => {
+        likesMap.set(like.postId, true);
+      });
     }
-    
-    return validPosts.map(({ post, user }) => {
-      const likesCount = Array.from(this.likes.values())
-        .filter(like => like.postId === post.id)
-        .length;
-      
-      const commentsCount = Array.from(this.comments.values())
-        .filter(comment => comment.postId === post.id)
-        .length;
-      
-      let liked = false;
-      if (currentUserId) {
-        liked = !!Array.from(this.likes.values()).find(
-          like => like.postId === post.id && like.userId === currentUserId
-        );
-      }
-      
-      return {
-        ...post,
-        user,
-        likesCount,
-        commentsCount,
-        liked
-      };
-    });
+
+    return result.map(({ post, user, likesCount, commentsCount }) => ({
+      ...post,
+      user,
+      likesCount,
+      commentsCount,
+      liked: likesMap.has(post.id)
+    }));
   }
 
   // Like operations
   async getLike(userId: number, postId: number): Promise<Like | undefined> {
-    return Array.from(this.likes.values()).find(
-      like => like.userId === userId && like.postId === postId
-    );
+    const [like] = await db
+      .select()
+      .from(likes)
+      .where(
+        and(
+          eq(likes.userId, userId),
+          eq(likes.postId, postId)
+        )
+      );
+    return like;
   }
 
   async createLike(likeData: InsertLike): Promise<Like> {
-    const id = this.likeId++;
-    const now = new Date();
-    const like: Like = { ...likeData, id, createdAt: now };
-    this.likes.set(id, like);
+    const [like] = await db
+      .insert(likes)
+      .values({
+        ...likeData,
+        createdAt: new Date()
+      })
+      .returning();
     return like;
   }
 
   async deleteLike(userId: number, postId: number): Promise<boolean> {
-    const like = await this.getLike(userId, postId);
-    if (!like) return false;
-    return this.likes.delete(like.id);
+    await db
+      .delete(likes)
+      .where(
+        and(
+          eq(likes.userId, userId),
+          eq(likes.postId, postId)
+        )
+      );
+    return true;
   }
 
   async getPostLikes(postId: number): Promise<Like[]> {
-    return Array.from(this.likes.values())
-      .filter(like => like.postId === postId);
+    return db
+      .select()
+      .from(likes)
+      .where(eq(likes.postId, postId));
   }
 
   // Comment operations
   async getComment(id: number): Promise<Comment | undefined> {
-    return this.comments.get(id);
+    const [comment] = await db
+      .select()
+      .from(comments)
+      .where(eq(comments.id, id));
+    return comment;
   }
 
   async getPostComments(postId: number): Promise<Comment[]> {
-    return Array.from(this.comments.values())
-      .filter(comment => comment.postId === postId)
-      .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+    const result = await db
+      .select({
+        comment: comments,
+        user: {
+          id: users.id,
+          username: users.username,
+          displayName: users.displayName,
+          profileImage: users.profileImage
+        }
+      })
+      .from(comments)
+      .innerJoin(users, eq(comments.userId, users.id))
+      .where(eq(comments.postId, postId))
+      .orderBy(asc(comments.createdAt));
+
+    return result.map(({ comment, user }) => ({
+      ...comment,
+      user
+    }));
   }
 
   async createComment(commentData: InsertComment): Promise<Comment> {
-    const id = this.commentId++;
-    const now = new Date();
-    const comment: Comment = { ...commentData, id, createdAt: now };
-    this.comments.set(id, comment);
+    const [comment] = await db
+      .insert(comments)
+      .values({
+        ...commentData,
+        createdAt: new Date()
+      })
+      .returning();
     return comment;
   }
 
   async deleteComment(id: number): Promise<boolean> {
-    return this.comments.delete(id);
+    await db
+      .delete(comments)
+      .where(eq(comments.id, id));
+    return true;
   }
 
   // Follow operations
   async getFollow(followerId: number, followingId: number): Promise<Follow | undefined> {
-    return Array.from(this.follows.values()).find(
-      follow => follow.followerId === followerId && follow.followingId === followingId
-    );
+    const [follow] = await db
+      .select()
+      .from(follows)
+      .where(
+        and(
+          eq(follows.followerId, followerId),
+          eq(follows.followingId, followingId)
+        )
+      );
+    return follow;
   }
 
   async createFollow(followData: InsertFollow): Promise<Follow> {
-    const id = this.followId++;
-    const now = new Date();
-    const follow: Follow = { ...followData, id, createdAt: now };
-    this.follows.set(id, follow);
+    const [follow] = await db
+      .insert(follows)
+      .values({
+        ...followData,
+        createdAt: new Date()
+      })
+      .returning();
     return follow;
   }
 
   async deleteFollow(followerId: number, followingId: number): Promise<boolean> {
-    const follow = await this.getFollow(followerId, followingId);
-    if (!follow) return false;
-    return this.follows.delete(follow.id);
+    await db
+      .delete(follows)
+      .where(
+        and(
+          eq(follows.followerId, followerId),
+          eq(follows.followingId, followingId)
+        )
+      );
+    return true;
   }
 
   async getUserFollowers(userId: number): Promise<User[]> {
-    const followerIds = Array.from(this.follows.values())
-      .filter(follow => follow.followingId === userId)
-      .map(follow => follow.followerId);
-    
-    return Promise.all(followerIds.map(id => this.getUser(id)))
-      .then(users => users.filter((user): user is User => user !== undefined));
+    const result = await db
+      .select({
+        id: users.id,
+        username: users.username,
+        displayName: users.displayName,
+        email: users.email,
+        profileImage: users.profileImage,
+        bio: users.bio,
+        joinedAt: users.joinedAt
+      })
+      .from(follows)
+      .innerJoin(users, eq(follows.followerId, users.id))
+      .where(eq(follows.followingId, userId));
+
+    return result;
   }
 
   async getUserFollowing(userId: number): Promise<User[]> {
-    const followingIds = Array.from(this.follows.values())
-      .filter(follow => follow.followerId === userId)
-      .map(follow => follow.followingId);
-    
-    return Promise.all(followingIds.map(id => this.getUser(id)))
-      .then(users => users.filter((user): user is User => user !== undefined));
+    const result = await db
+      .select({
+        id: users.id,
+        username: users.username,
+        displayName: users.displayName,
+        email: users.email,
+        profileImage: users.profileImage,
+        bio: users.bio,
+        joinedAt: users.joinedAt
+      })
+      .from(follows)
+      .innerJoin(users, eq(follows.followingId, users.id))
+      .where(eq(follows.followerId, userId));
+
+    return result;
   }
 
   async getRecommendedUsers(userId: number): Promise<User[]> {
-    // Simple implementation to return all users except the current user
-    // and those the user is already following
-    const following = await this.getUserFollowing(userId);
-    const followingIds = following.map(user => user.id);
+    // Get users that the current user is not following
+    // and that have similar collectible interests (same series)
+    const userCollectibles = await this.getUserCollectibles(userId);
+    const userSeries = [...new Set(userCollectibles.map(c => c.series))];
     
-    return Array.from(this.users.values())
-      .filter(user => user.id !== userId && !followingIds.includes(user.id));
+    if (userSeries.length === 0) {
+      // If user has no collectibles, just return some random users
+      return db
+        .select()
+        .from(users)
+        .where(sql`${users.id} != ${userId}`)
+        .limit(5);
+    }
+
+    // Get users who have collectibles in the same series
+    const followingUserIds = (await this.getUserFollowing(userId)).map(u => u.id);
+    followingUserIds.push(userId); // Add current user to exclusion list
+    
+    // Find users with similar interests who are not already followed
+    const result = await db
+      .select({
+        id: users.id,
+        username: users.username,
+        displayName: users.displayName,
+        email: users.email,
+        profileImage: users.profileImage,
+        bio: users.bio,
+        joinedAt: users.joinedAt,
+        matchCount: sql`count(distinct ${collectibles.id})::int`
+      })
+      .from(users)
+      .innerJoin(collectibles, eq(users.id, collectibles.userId))
+      .where(
+        and(
+          sql`${users.id} NOT IN (${followingUserIds.length > 0 ? followingUserIds.join(',') : 0})`,
+          inArray(collectibles.series, userSeries)
+        )
+      )
+      .groupBy(users.id)
+      .orderBy(desc(sql`count(distinct ${collectibles.id})`))
+      .limit(5);
+    
+    return result;
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
