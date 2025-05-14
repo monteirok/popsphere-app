@@ -224,9 +224,17 @@ export default function Profile() {
   
   return (
     <div className="max-w-4xl mx-auto">
-      <div className="bg-white dark:bg-gray-800 rounded-custom p-6 shadow-soft mb-6">
-        <div className="flex flex-col md:flex-row items-center md:items-start">
-          <Avatar className="h-24 w-24 rounded-full mb-4 md:mb-0 md:mr-6 border-2 border-pop-pink">
+      <div className="bg-white dark:bg-gray-800 rounded-custom shadow-soft mb-6 overflow-hidden">
+        {profileUser?.profileBanner && (
+          <div 
+            className="w-full h-48 bg-cover bg-center relative" 
+            style={{ backgroundImage: `url(${profileUser.profileBanner})` }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+          </div>
+        )}
+        <div className="p-6 flex flex-col md:flex-row items-center md:items-start">
+          <Avatar className={`h-24 w-24 rounded-full mb-4 md:mb-0 md:mr-6 border-2 border-pop-pink ${profileUser?.profileBanner ? 'md:-mt-12' : ''}`}>
             <AvatarImage src={profileUser?.profileImage} alt={profileUser?.displayName} />
             <AvatarFallback className="text-xl">{getInitials(profileUser?.displayName || "")}</AvatarFallback>
           </Avatar>
@@ -285,18 +293,43 @@ export default function Profile() {
                       </div>
                       
                       <div className="space-y-2">
-                        <Label htmlFor="profileImage">Profile Image URL</Label>
-                        <div className="flex space-x-2">
-                          <Input 
-                            id="profileImage" 
-                            value={profileImage}
-                            onChange={(e) => setProfileImage(e.target.value)}
-                            placeholder="https://example.com/image.jpg"
+                        <Label htmlFor="profileImage">Profile Image</Label>
+                        <div className="flex flex-col space-y-2">
+                          <div className="flex space-x-2 items-center">
+                            <Avatar className="h-10 w-10 rounded-full">
+                              <AvatarImage src={profileImage} alt={displayName} />
+                              <AvatarFallback>{getInitials(displayName)}</AvatarFallback>
+                            </Avatar>
+                            <div className="text-sm text-gray-500 dark:text-gray-400 truncate flex-1">
+                              {profileImage ? profileImage.split('/').pop() : 'No image selected'}
+                            </div>
+                          </div>
+                          <FileUpload
+                            onFileSelected={setProfileImage}
+                            endpoint={`/api/users/${currentUser?.id}/profile-image`}
+                            buttonText="Upload Profile Image"
+                            disabled={isUpdating}
                           />
-                          <Avatar className="h-10 w-10 rounded-full">
-                            <AvatarImage src={profileImage} alt={displayName} />
-                            <AvatarFallback>{getInitials(displayName)}</AvatarFallback>
-                          </Avatar>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="profileBanner">Profile Banner</Label>
+                        <div className="flex flex-col space-y-2">
+                          {profileBanner && (
+                            <div className="w-full h-20 rounded-lg bg-cover bg-center mb-2 overflow-hidden border dark:border-gray-700" 
+                                 style={{ backgroundImage: `url(${profileBanner})` }}>
+                            </div>
+                          )}
+                          <div className="text-sm text-gray-500 dark:text-gray-400 truncate">
+                            {profileBanner ? profileBanner.split('/').pop() : 'No banner selected'}
+                          </div>
+                          <FileUpload
+                            onFileSelected={setProfileBanner}
+                            endpoint={`/api/users/${currentUser?.id}/banner`}
+                            buttonText="Upload Banner Image"
+                            disabled={isUpdating}
+                          />
                         </div>
                       </div>
                       

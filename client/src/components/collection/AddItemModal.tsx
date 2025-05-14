@@ -12,6 +12,8 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { insertCollectibleSchema } from "@shared/schema";
+import { FileUpload } from "@/components/ui/file-upload";
+import { useAuth } from "@/hooks/use-auth";
 
 // Extend the schema with validation rules
 const addItemSchema = insertCollectibleSchema.extend({
@@ -19,7 +21,9 @@ const addItemSchema = insertCollectibleSchema.extend({
   series: z.string().min(1, "Series is required"),
   variant: z.string().min(1, "Variant is required"),
   rarity: z.string().min(1, "Rarity is required"),
-  image: z.string().url("Must be a valid URL"),
+  image: z.string().refine(val => val === '' || val.startsWith('http'), {
+    message: "Must be empty or a valid URL",
+  }),
   description: z.string().optional(),
 });
 
@@ -51,6 +55,7 @@ interface AddItemModalProps {
 export default function AddItemModal({ open, onOpenChange, onSuccess }: AddItemModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   
   // Set up the form
   const form = useForm<z.infer<typeof addItemSchema>>({
