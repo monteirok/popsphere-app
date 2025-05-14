@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "wouter";
-import { Search, Bell, MessageSquare, User, X } from "lucide-react";
+import { Search, MessageSquare, User, X } from "lucide-react";
 import { Input } from "../ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
 import { useAuth } from "../../hooks/use-auth";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "../../lib/queryClient";
+import NotificationDropdown from "../notification/NotificationDropdown";
 
 // Define the user interface for search results
 interface SearchUser {
@@ -164,7 +165,7 @@ export default function Header() {
           <Button variant="default" className="hidden md:flex bg-pop-pink hover:bg-opacity-90 text-white rounded-full px-4 py-2 font-medium text-sm transition">
             Add Item
           </Button>
-          <Bell className="h-6 w-6 text-dark-grey cursor-pointer" />
+          <NotificationDropdown />
           <MessageSquare className="h-6 w-6 text-dark-grey cursor-pointer" />
           
           {user && (

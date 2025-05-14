@@ -4,10 +4,14 @@ import { storage } from "./storage";
 import { z } from "zod";
 import { insertUserSchema, insertCollectibleSchema, insertTradeSchema, insertPostSchema, insertCommentSchema } from "@shared/schema";
 import { setupAuth, isAuthenticated } from "./auth";
+import { registerNotificationRoutes, createTradeRequestNotification, createTradeStatusNotification, createFollowNotification, createLikeNotification, createCommentNotification } from "./notifications";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication with database session storage
   setupAuth(app);
+  
+  // Register notification routes
+  registerNotificationRoutes(app);
 
   // Auth routes are now handled by auth.ts
   // Using the '/api/user' endpoint for user session info
