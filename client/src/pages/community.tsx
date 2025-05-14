@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/use-auth";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Camera, X } from "lucide-react";
+import { Camera, X, RefreshCw } from "lucide-react";
 import PostCard from "@/components/community/PostCard";
 import UserSuggestionsWidget from "@/components/community/UserSuggestionsWidget";
 
@@ -16,11 +16,31 @@ export default function Community() {
   const [postContent, setPostContent] = useState("");
   const [postImages, setPostImages] = useState<string[]>([]);
   const [imageInputUrl, setImageInputUrl] = useState("");
+  const [refreshInterval, setRefreshInterval] = useState<number>(15000); // 15 seconds by default
+  const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   
   // Fetch community feed posts
-  const { data: posts = [], isLoading: isLoadingPosts } = useQuery({
+  const { data: posts = [], isLoading: isLoadingPosts, refetch } = useQuery({
     queryKey: ["/api/posts"],
+    refetchInterval: refreshInterval,
   });
+  
+  // Function to manually refresh posts
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await refetch();
+    setTimeout(() => setIsRefreshing(false), 1000); // Show refresh animation for at least 1 second
+  };
+  
+  // Auto-refresh when the component mounts
+  useEffect(() => {
+    handleRefresh();
+    
+    // Stop auto-refresh when component unmounts
+    return () => {
+      setRefreshInterval(0);
+    };
+  }, []);
   
   // Create post mutation
   const { mutate: createPost, isPending } = useMutation({
@@ -35,6 +55,7 @@ export default function Community() {
       setPostContent("");
       setPostImages([]);
       queryClient.invalidateQueries({ queryKey: ["/api/posts"] });
+      handleRefresh(); // Manually refresh the posts
       toast({
         title: "Post created",
         description: "Your post has been published to the community.",
@@ -90,7 +111,18 @@ export default function Community() {
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <div className="lg:col-span-2">
         <div className="bg-white rounded-custom p-4 shadow-soft mb-6">
-          <h2 className="text-xl font-bold font-nunito mb-4">Community Feed</h2>
+          <div className="flex items-center gap-2 mb-4">
+            <h2 className="text-xl font-bold font-nunito">Community Feed</h2>
+            <Button
+              variant="outline"
+              size="icon"
+              className={`rounded-full h-8 w-8 ${isRefreshing ? 'animate-spin' : ''}`}
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+            >
+              <RefreshCw className="h-4 w-4 text-pop-pink" />
+            </Button>
+          </div>
           
           <div className="mb-4">
             <Textarea
