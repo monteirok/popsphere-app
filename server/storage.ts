@@ -7,6 +7,7 @@ import {
   likes, 
   comments, 
   follows,
+  notifications,
   User,
   Collectible,
   Trade,
@@ -14,6 +15,7 @@ import {
   Comment,
   Like,
   Follow,
+  Notification,
   InsertUser,
   InsertCollectible,
   InsertTrade,
@@ -21,9 +23,11 @@ import {
   InsertComment,
   InsertLike,
   InsertFollow,
+  InsertNotification,
   CollectibleWithUser,
   TradeWithDetails,
-  PostWithDetails 
+  PostWithDetails,
+  NotificationWithActor
 } from '@shared/schema';
 import { eq, and, or, desc, asc, sql, inArray, ne } from 'drizzle-orm';
 import connectPg from "connect-pg-simple";
@@ -670,6 +674,99 @@ export class DatabaseStorage implements IStorage {
       .limit(5);
     
     return result;
+  }
+  
+  // Notification operations
+  async getUserNotifications(userId: number, limit = 20, includingRead = false): Promise<NotificationWithActor[]> {
+    const query = db
+      .select()
+      .from(notifications)
+      .where(eq(notifications.userId, userId));
+    
+    if (!includingRead) {
+      query.where(eq(notifications.read, false));
+    }
+    
+    const userNotifications = await query
+      .orderBy(desc(notifications.createdAt))
+      .limit(limit);
+    
+    // Get the actor details for each notification
+    const notificationsWithActor: NotificationWithActor[] = [];
+    
+    for (const notification of userNotifications) {
+      const notificationWithActor: NotificationWithActor = { ...notification, actor: undefined };
+      
+      if (notification.actorId) {
+        const actor = await this.getUser(notification.actorId);
+        if (actor) {
+          notificationWithActor.actor = actor;
+        }
+      }
+      
+      notificationsWithActor.push(notificationWithActor);
+    }
+    
+    return notificationsWithActor;
+  }
+  
+  async getNotification(id: number): Promise<Notification | undefined> {
+    const [notification] = await db
+      .select()
+      .from(notifications)
+      .where(eq(notifications.id, id));
+    
+    return notification;
+  }
+  
+  async createNotification(notificationData: InsertNotification): Promise<Notification> {
+    const [notification] = await db
+      .insert(notifications)
+      .values(notificationData)
+      .returning();
+    
+    return notification;
+  }
+  
+  async markNotificationAsRead(id: number): Promise<boolean> {
+    const result = await db
+      .update(notifications)
+      .set({ read: true })
+      .where(eq(notifications.id, id))
+      .returning();
+    
+    return result.length > 0;
+  }
+  
+  async markAllUserNotificationsAsRead(userId: number): Promise<boolean> {
+    const result = await db
+      .update(notifications)
+      .set({ read: true })
+      .where(eq(notifications.userId, userId))
+      .returning();
+    
+    return result.length > 0;
+  }
+  
+  async getUnreadNotificationCount(userId: number): Promise<number> {
+    const result = await db
+      .select({ count: count() })
+      .from(notifications)
+      .where(and(
+        eq(notifications.userId, userId),
+        eq(notifications.read, false)
+      ));
+    
+    return Number(result[0]?.count) || 0;
+  }
+  
+  async deleteNotification(id: number): Promise<boolean> {
+    const result = await db
+      .delete(notifications)
+      .where(eq(notifications.id, id))
+      .returning();
+    
+    return result.length > 0;
   }
 }
 
