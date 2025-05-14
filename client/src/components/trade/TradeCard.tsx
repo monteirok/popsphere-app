@@ -172,13 +172,19 @@ export default function TradeCard({ trade, isUserProposer }: TradeCardProps) {
       
       {trade.status === "accepted" && (
         <div className="mt-3 p-2 bg-green-50 border border-green-200 rounded-custom text-center text-xs text-green-700">
-          Trade accepted! Coordinate with the other collector to complete the exchange.
+          <div className="flex items-center justify-center">
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse mr-2"></div>
+            Trade accepted! Coordinate with the other collector to complete the exchange.
+          </div>
         </div>
       )}
       
       {trade.status === "rejected" && (
         <div className="mt-3 p-2 bg-red-50 border border-red-200 rounded-custom text-center text-xs text-red-700">
-          Trade declined. Better luck next time!
+          <div className="flex items-center justify-center">
+            <div className="w-2 h-2 bg-red-500 rounded-full mr-2"></div>
+            Trade declined. Better luck next time!
+          </div>
         </div>
       )}
     </div>

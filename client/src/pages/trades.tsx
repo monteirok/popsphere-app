@@ -12,7 +12,7 @@ export default function Trades() {
   const { user } = useAuth();
   const [isTradeModalOpen, setIsTradeModalOpen] = useState(false);
   
-  const [refreshInterval, setRefreshInterval] = useState<number>(15000); // 15 seconds by default
+  const [refreshInterval, setRefreshInterval] = useState<number>(10000); // 10 seconds by default for more frequent trade updates
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   
   const { data: trades = [], isLoading, refetch } = useQuery<TradeWithDetails[]>({
