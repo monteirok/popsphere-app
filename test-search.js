@@ -1,5 +1,5 @@
-// Test script for the user search API
-const testUserSearch = async () => {
+// Test script for the API endpoints
+const testAPI = async () => {
   try {
     // Test search with 'doe' - should return both John Doe and Jane Doe
     console.log('\n--- Testing search with "doe" ---');
@@ -50,9 +50,31 @@ const testUserSearch = async () => {
     const usernameResult = await usernameResponse.json();
     console.log('User:', usernameResult ? `${usernameResult.displayName} (@${usernameResult.username})` : 'Not found');
 
+    // Testing get user followers (requires login, just confirm endpoint is correctly configured)
+    console.log('\n--- Testing get user followers by username "johndoe" ---');
+    const followersResponse = await fetch('http://localhost:5000/api/users/johndoe/followers');
+    console.log('Response status:', followersResponse.status);
+    if (followersResponse.status === 200) {
+      const followers = await followersResponse.json();
+      console.log(`User has ${followers.length} followers`);
+    } else {
+      console.log('This endpoint is protected or requires login');
+    }
+
+    // Testing get user following (requires login, just confirm endpoint is correctly configured)
+    console.log('\n--- Testing get user following by username "johndoe" ---'); 
+    const followingResponse = await fetch('http://localhost:5000/api/users/johndoe/following');
+    console.log('Response status:', followingResponse.status);
+    if (followingResponse.status === 200) {
+      const following = await followingResponse.json();
+      console.log(`User is following ${following.length} users`);
+    } else {
+      console.log('This endpoint is protected or requires login');
+    }
+
   } catch (error) {
     console.error('Error during tests:', error);
   }
 };
 
-testUserSearch();
+testAPI();
