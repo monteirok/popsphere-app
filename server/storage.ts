@@ -18,6 +18,7 @@ export interface IStorage {
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, data: Partial<User>): Promise<User | undefined>;
   getAllUsers(): Promise<User[]>;
+  searchUsers(query: string): Promise<User[]>;
   
   // Collectible operations
   getCollectible(id: number): Promise<Collectible | undefined>;
@@ -202,6 +203,15 @@ export class MemStorage implements IStorage {
 
   async getAllUsers(): Promise<User[]> {
     return Array.from(this.users.values());
+  }
+
+  async searchUsers(query: string): Promise<User[]> {
+    const lowerQuery = query.toLowerCase();
+    return Array.from(this.users.values()).filter(
+      user => 
+        user.username.toLowerCase().includes(lowerQuery) || 
+        user.displayName.toLowerCase().includes(lowerQuery)
+    );
   }
 
   // Collectible operations
