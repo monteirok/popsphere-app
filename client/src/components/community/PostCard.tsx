@@ -128,16 +128,16 @@ export default function PostCard({ post }: PostCardProps) {
     <div className="mb-4 pb-4 border-b border-gray-100">
       <div className="flex items-center mb-3">
         <AvatarWithStatus
-          src={post.user.profileImage || ""}
-          alt={post.user.displayName}
+          src={post.user?.profileImage || ""}
+          alt={post.user?.displayName || "User"}
           className="w-8 h-8 rounded-full mr-2"
         />
         <div>
-          <p className="font-medium text-sm">{post.user.username === user?.username ? "You" : post.user.displayName}</p>
+          <p className="font-medium text-sm">{post.user?.username === user?.username ? "You" : post.user?.displayName || "Unknown User"}</p>
           <p className="text-xs text-gray-500">{formatDate(post.createdAt)}</p>
         </div>
         
-        {post.user.id === user?.id && (
+        {post.user?.id === user?.id && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="ml-auto p-0 h-8 w-8">
@@ -199,12 +199,12 @@ export default function PostCard({ post }: PostCardProps) {
                 {(comments as any[]).map((comment) => (
                   <div key={comment.id} className="flex items-start space-x-2">
                     <AvatarWithStatus
-                      src={comment.user.profileImage || ""}
-                      alt={comment.user.displayName}
+                      src={comment.user?.profileImage || ""}
+                      alt={comment.user?.displayName || "User"}
                       className="w-6 h-6 rounded-full"
                     />
                     <div className="bg-white p-2 rounded-lg text-xs flex-grow">
-                      <p className="font-medium">{comment.user.displayName}</p>
+                      <p className="font-medium">{comment.user?.displayName || "Unknown User"}</p>
                       <p>{comment.content}</p>
                     </div>
                   </div>
