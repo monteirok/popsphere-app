@@ -75,22 +75,22 @@ export default function CollectionGrid({ userId, series = "all", sort = "newest"
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-custom p-4 shadow-soft flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-pop-pink"></div>
+      <div className="bg-white dark:bg-gray-800 rounded-custom p-4 shadow-soft dark:shadow-soft-dark flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-pop-pink dark:border-brand-dark"></div>
       </div>
     );
   }
 
   if (isError) {
     return (
-      <div className="bg-white rounded-custom p-4 shadow-soft">
-        <p className="text-center text-red-500">Failed to load collection. Please try again.</p>
+      <div className="bg-white dark:bg-gray-800 rounded-custom p-4 shadow-soft dark:shadow-soft-dark">
+        <p className="text-center text-red-500 dark:text-red-400">Failed to load collection. Please try again.</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-custom p-4 shadow-soft">
+    <div className="bg-white dark:bg-gray-800 rounded-custom p-4 shadow-soft dark:shadow-soft-dark">
       <div className="flex justify-end mb-3">
         <Button
           variant="outline"
@@ -99,7 +99,7 @@ export default function CollectionGrid({ userId, series = "all", sort = "newest"
           onClick={handleRefresh}
           disabled={isRefreshing}
         >
-          <RefreshCw className="h-4 w-4 text-pop-pink" />
+          <RefreshCw className="h-4 w-4 text-pop-pink dark:text-brand-dark" />
         </Button>
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
@@ -112,13 +112,13 @@ export default function CollectionGrid({ userId, series = "all", sort = "newest"
         
         {/* Add new item placeholder */}
         <div 
-          className="collection-item border-2 border-dashed border-gray-200 rounded-custom flex flex-col items-center justify-center p-4 hover:border-pop-pink cursor-pointer transition-colors aspect-square"
+          className="collection-item border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-custom flex flex-col items-center justify-center p-4 hover:border-pop-pink dark:hover:border-brand-dark cursor-pointer transition-colors aspect-square"
           onClick={() => setIsAddModalOpen(true)}
         >
-          <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-2">
-            <PlusIcon className="text-gray-400 h-6 w-6" />
+          <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mb-2">
+            <PlusIcon className="text-gray-400 dark:text-gray-500 h-6 w-6" />
           </div>
-          <p className="text-sm text-gray-500">Add New Item</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Add New Item</p>
         </div>
       </div>
       

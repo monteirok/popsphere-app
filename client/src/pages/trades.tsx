@@ -54,7 +54,7 @@ export default function Trades() {
   
   return (
     <div className="max-w-4xl mx-auto">
-      <div className="bg-white rounded-custom p-4 shadow-soft mb-6">
+      <div className="bg-white dark:bg-gray-800 rounded-custom p-4 shadow-soft dark:shadow-soft-dark mb-6">
         <div className="flex justify-between items-center mb-4">
           <div className="flex items-center gap-2">
             <h1 className="text-2xl font-bold font-nunito">Trade Center</h1>
@@ -65,41 +65,41 @@ export default function Trades() {
               onClick={handleRefresh}
               disabled={isRefreshing}
             >
-              <RefreshCw className="h-4 w-4 text-pop-pink" />
+              <RefreshCw className="h-4 w-4 text-pop-pink dark:text-brand-dark" />
             </Button>
           </div>
           <Button 
-            className="bg-pop-pink hover:bg-opacity-90 rounded-full"
+            className="bg-pop-pink dark:bg-brand-dark hover:bg-opacity-90 rounded-full"
             onClick={() => setIsTradeModalOpen(true)}
           >
             <Plus className="mr-1 h-4 w-4" /> New Trade
           </Button>
         </div>
         
-        <div className="p-3 bg-gray-50 rounded-custom mb-4">
-          <div className="text-sm">
+        <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-custom mb-4">
+          <div className="text-sm dark:text-gray-200">
             <p>Welcome to the Trade Center! Here you can manage all your trade requests with other collectors.</p>
             <p className="mt-1">To start a new trade, browse the collection and click on any item you're interested in.</p>
           </div>
         </div>
         
         <Tabs defaultValue="pending" className="w-full">
-          <TabsList className="w-full bg-gray-100 p-1 rounded-full">
+          <TabsList className="w-full bg-gray-100 dark:bg-gray-700 p-1 rounded-full">
             <TabsTrigger 
               value="pending" 
-              className="rounded-full data-[state=active]:bg-white data-[state=active]:text-pop-pink"
+              className="rounded-full data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:text-pop-pink dark:data-[state=active]:text-brand-dark"
             >
               Pending ({pendingTrades.length})
             </TabsTrigger>
             <TabsTrigger 
               value="completed" 
-              className="rounded-full data-[state=active]:bg-white data-[state=active]:text-pop-pink"
+              className="rounded-full data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:text-pop-pink dark:data-[state=active]:text-brand-dark"
             >
               Completed ({completedTrades.length})
             </TabsTrigger>
             <TabsTrigger 
               value="rejected" 
-              className="rounded-full data-[state=active]:bg-white data-[state=active]:text-pop-pink"
+              className="rounded-full data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:text-pop-pink dark:data-[state=active]:text-brand-dark"
             >
               Rejected ({rejectedTrades.length})
             </TabsTrigger>
@@ -108,7 +108,7 @@ export default function Trades() {
           <TabsContent value="pending" className="mt-4">
             {isLoading ? (
               <div className="py-12 flex justify-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-pop-pink"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-pop-pink dark:border-brand-dark"></div>
               </div>
             ) : pendingTrades.length > 0 ? (
               <div>
@@ -136,8 +136,8 @@ export default function Trades() {
               </div>
             ) : (
               <div className="py-12 text-center">
-                <p className="text-gray-500">No pending trades</p>
-                <p className="text-sm text-gray-400 mt-1">Browse the collection to find items to trade!</p>
+                <p className="text-gray-500 dark:text-gray-400">No pending trades</p>
+                <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">Browse the collection to find items to trade!</p>
               </div>
             )}
           </TabsContent>
@@ -145,7 +145,7 @@ export default function Trades() {
           <TabsContent value="completed" className="mt-4">
             {isLoading ? (
               <div className="py-12 flex justify-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-pop-pink"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-pop-pink dark:border-brand-dark"></div>
               </div>
             ) : completedTrades.length > 0 ? (
               <div className="space-y-3">
@@ -159,8 +159,8 @@ export default function Trades() {
               </div>
             ) : (
               <div className="py-12 text-center">
-                <p className="text-gray-500">No completed trades yet</p>
-                <p className="text-sm text-gray-400 mt-1">Your accepted and completed trades will appear here</p>
+                <p className="text-gray-500 dark:text-gray-400">No completed trades yet</p>
+                <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">Your accepted and completed trades will appear here</p>
               </div>
             )}
           </TabsContent>
@@ -168,7 +168,7 @@ export default function Trades() {
           <TabsContent value="rejected" className="mt-4">
             {isLoading ? (
               <div className="py-12 flex justify-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-pop-pink"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-pop-pink dark:border-brand-dark"></div>
               </div>
             ) : rejectedTrades.length > 0 ? (
               <div className="space-y-3">
@@ -182,8 +182,8 @@ export default function Trades() {
               </div>
             ) : (
               <div className="py-12 text-center">
-                <p className="text-gray-500">No rejected trades</p>
-                <p className="text-sm text-gray-400 mt-1">Trades that were rejected will appear here</p>
+                <p className="text-gray-500 dark:text-gray-400">No rejected trades</p>
+                <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">Trades that were rejected will appear here</p>
               </div>
             )}
           </TabsContent>
