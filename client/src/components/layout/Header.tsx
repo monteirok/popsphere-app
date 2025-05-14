@@ -3,6 +3,7 @@ import { Link, useLocation } from "wouter";
 import { Search, MessageSquare, User, X } from "lucide-react";
 import { Input } from "../ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { getInitials } from "../../lib/utils";
 import { Button } from "../ui/button";
 import { useAuth } from "../../hooks/use-auth";
 import { useQuery } from "@tanstack/react-query";

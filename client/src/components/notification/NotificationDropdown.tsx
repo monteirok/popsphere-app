@@ -38,15 +38,15 @@ export default function NotificationDropdown() {
   const { toast } = useToast();
   const [open, setOpen] = React.useState(false);
 
-  const { data: notifications = [], isLoading } = useQuery({
-    queryKey: user ? ['/api/notifications'] : null,
+  const { data: notifications = [], isLoading } = useQuery<Notification[]>({
+    queryKey: user ? ['/api/notifications'] : ['/api/notifications', 'disabled'],
     queryFn: () => fetch('/api/notifications').then(res => res.json()),
     refetchInterval: 30000, // Refetch every 30 seconds
     enabled: !!user,
   });
 
-  const { data: unreadCount = 0 } = useQuery({
-    queryKey: user ? ['/api/notifications/unread-count'] : null,
+  const { data: unreadCount = 0 } = useQuery<number>({
+    queryKey: user ? ['/api/notifications/unread-count'] : ['/api/notifications/unread-count', 'disabled'],
     queryFn: () => fetch('/api/notifications/unread-count').then(res => res.json()),
     refetchInterval: 30000,
     enabled: !!user,
