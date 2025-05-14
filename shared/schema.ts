@@ -134,6 +134,27 @@ export type InsertComment = z.infer<typeof insertCommentSchema>;
 export type Follow = typeof follows.$inferSelect;
 export type InsertFollow = z.infer<typeof insertFollowSchema>;
 
+// Notifications schema
+export const notifications = pgTable("notifications", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  type: text("type").notNull(), // trade_request, trade_accepted, trade_rejected, trade_completed, follow, like, comment
+  content: text("content").notNull(),
+  sourceId: integer("source_id"), // ID of the related trade, post, comment, etc.
+  sourceType: text("source_type"), // trade, post, comment, follow, etc.
+  actorId: integer("actor_id").references(() => users.id), // User who triggered the notification
+  read: boolean("read").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertNotificationSchema = createInsertSchema(notifications).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type Notification = typeof notifications.$inferSelect;
+export type InsertNotification = z.infer<typeof insertNotificationSchema>;
+
 // Extended types with joined data
 export type CollectibleWithUser = Collectible & {
   user: User;
@@ -151,4 +172,8 @@ export type PostWithDetails = Post & {
   likesCount: number;
   commentsCount: number;
   liked?: boolean;
+};
+
+export type NotificationWithActor = Notification & {
+  actor?: User;
 };

@@ -88,6 +88,15 @@ export interface IStorage {
   getUserFollowers(userId: number): Promise<User[]>;
   getUserFollowing(userId: number): Promise<User[]>;
   getRecommendedUsers(userId: number): Promise<User[]>;
+  
+  // Notification operations
+  getUserNotifications(userId: number, limit?: number, includingRead?: boolean): Promise<NotificationWithActor[]>;
+  getNotification(id: number): Promise<Notification | undefined>;
+  createNotification(notification: InsertNotification): Promise<Notification>;
+  markNotificationAsRead(id: number): Promise<boolean>;
+  markAllUserNotificationsAsRead(userId: number): Promise<boolean>;
+  getUnreadNotificationCount(userId: number): Promise<number>;
+  deleteNotification(id: number): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
