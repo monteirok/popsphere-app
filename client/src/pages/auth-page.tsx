@@ -50,7 +50,7 @@ export default function AuthPage() {
       </div>
       
       {/* Right side - Hero */}
-      <div className="hidden md:block md:w-1/2 bg-gradient-to-br from-pop-pink to-pop-blue text-white">
+      <div className="hidden md:block md:w-1/2 bg-pop-pink text-white">
         <div className="h-full flex flex-col justify-center p-12">
           <h2 className="text-4xl font-bold mb-4">Join the PopMart Collectors Community</h2>
           <p className="text-lg mb-6">
