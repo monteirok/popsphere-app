@@ -1,4 +1,4 @@
-import type { Express, Request, Response } from "express";
+import express, { type Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { z } from "zod";
@@ -21,6 +21,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Register notification routes
   registerNotificationRoutes(app);
+  
+  // Serve static uploads
+  app.use('/uploads', express.static('uploads'));
+  
+  // Add multer error handling middleware
+  app.use(handleMulterError);
 
   // Auth routes are now handled by auth.ts
   // Using the '/api/user' endpoint for user session info
@@ -43,6 +49,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         username: user.username,
         displayName: user.displayName,
         profileImage: user.profileImage,
+        profileBanner: user.profileBanner,
         bio: user.bio
       }));
       
@@ -65,6 +72,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         username: user.username,
         displayName: user.displayName,
         profileImage: user.profileImage,
+        profileBanner: user.profileBanner,
         bio: user.bio
       }));
       
@@ -101,11 +109,80 @@ export async function registerRoutes(app: Express): Promise<Server> {
         username: user.username,
         displayName: user.displayName,
         profileImage: user.profileImage,
+        profileBanner: user.profileBanner,
         bio: user.bio,
         joinedAt: user.joinedAt
       });
     } catch (error) {
       console.error("Error getting user:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  // Profile image upload endpoint
+  app.post("/api/users/:id/profile-image", isAuthenticated, upload.single('image'), async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      const currentUser = req.user as any;
+      
+      if (userId !== currentUser.id) {
+        return res.status(403).json({ message: "You can only update your own profile" });
+      }
+      
+      if (!req.file) {
+        return res.status(400).json({ message: "No image file uploaded" });
+      }
+      
+      // Get the relative path to the uploaded file
+      const profileImagePath = `${req.file.path}`;
+      
+      // Update the user's profile image in the database
+      const updatedUser = await storage.updateUser(userId, { profileImage: profileImagePath });
+      
+      if (!updatedUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      res.json({
+        id: updatedUser.id,
+        profileImage: updatedUser.profileImage
+      });
+    } catch (error) {
+      console.error("Error uploading profile image:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+  
+  // Profile banner upload endpoint
+  app.post("/api/users/:id/banner", isAuthenticated, upload.single('image'), async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      const currentUser = req.user as any;
+      
+      if (userId !== currentUser.id) {
+        return res.status(403).json({ message: "You can only update your own profile banner" });
+      }
+      
+      if (!req.file) {
+        return res.status(400).json({ message: "No banner image file uploaded" });
+      }
+      
+      // Get the relative path to the uploaded file
+      const bannerPath = `${req.file.path}`;
+      
+      // Update the user's profile banner in the database
+      const updatedUser = await storage.updateUser(userId, { profileBanner: bannerPath });
+      
+      if (!updatedUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      res.json({
+        id: updatedUser.id,
+        profileBanner: updatedUser.profileBanner
+      });
+    } catch (error) {
+      console.error("Error uploading profile banner:", error);
       res.status(500).json({ message: "Server error" });
     }
   });
@@ -123,6 +200,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         displayName: z.string().optional(),
         bio: z.string().optional(),
         profileImage: z.string().optional(),
+        profileBanner: z.string().optional(),
       });
       
       const result = updateSchema.safeParse(req.body);
@@ -140,6 +218,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         username: updatedUser.username,
         displayName: updatedUser.displayName,
         profileImage: updatedUser.profileImage,
+        profileBanner: updatedUser.profileBanner,
         bio: updatedUser.bio
       });
     } catch (error) {
@@ -198,6 +277,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(collectible);
     } catch (error) {
       console.error("Error getting collectible:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  // Upload collectible image
+  app.post("/api/collectibles/upload-image", isAuthenticated, upload.single('image'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No image file uploaded" });
+      }
+      
+      // Return the path to the uploaded file
+      const imagePath = `${req.file.path}`;
+      res.json({ imagePath });
+    } catch (error) {
+      console.error("Error uploading collectible image:", error);
       res.status(500).json({ message: "Server error" });
     }
   });
