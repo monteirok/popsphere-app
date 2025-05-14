@@ -11,6 +11,7 @@ export const users = pgTable("users", {
   displayName: text("display_name").notNull(),
   bio: text("bio"),
   profileImage: text("profile_image"),
+  profileBanner: text("profile_banner"),
   joinedAt: timestamp("joined_at").defaultNow().notNull(),
 });
 

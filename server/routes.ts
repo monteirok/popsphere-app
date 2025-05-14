@@ -2,6 +2,7 @@ import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { z } from "zod";
+import path from "path";
 import { 
   insertUserSchema, 
   insertCollectibleSchema, 
@@ -12,6 +13,7 @@ import {
 } from "@shared/schema";
 import { setupAuth, isAuthenticated } from "./auth";
 import { registerNotificationRoutes, createTradeRequestNotification, createTradeStatusNotification, createFollowNotification, createLikeNotification, createCommentNotification } from "./notifications";
+import { upload, handleMulterError, getFileUrl } from "./upload";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication with database session storage
