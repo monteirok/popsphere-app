@@ -31,6 +31,7 @@ import CollectionItemCard from "@/components/collection/CollectionItemCard";
 import PostCard from "@/components/community/PostCard";
 import UserSuggestionCard from "@/components/community/UserSuggestionCard";
 import TradeCard from "@/components/trade/TradeCard";
+import FollowersModal from "@/components/profile/FollowersModal";
 
 export default function Profile() {
   const { username } = useParams<{ username?: string }>();
@@ -44,6 +45,9 @@ export default function Profile() {
   const [displayName, setDisplayName] = useState("");
   const [bio, setBio] = useState("");
   const [profileImage, setProfileImage] = useState("");
+  
+  // State for followers/following modal
+  const [isFollowersModalOpen, setIsFollowersModalOpen] = useState(false);
   
   // Fetch the profile user (either current user or the username in URL)
   const { data: profileUser, isLoading: isLoadingUser } = useQuery({
@@ -221,11 +225,17 @@ export default function Profile() {
                 <div className="text-lg font-bold">{collectibles.length}</div>
                 <div className="text-xs text-gray-500">Collectibles</div>
               </div>
-              <div className="text-center">
+              <div 
+                className="text-center cursor-pointer hover:opacity-80 transition-opacity"
+                onClick={() => setIsFollowersModalOpen(true)}
+              >
                 <div className="text-lg font-bold">{followers.length}</div>
                 <div className="text-xs text-gray-500">Followers</div>
               </div>
-              <div className="text-center">
+              <div 
+                className="text-center cursor-pointer hover:opacity-80 transition-opacity"
+                onClick={() => setIsFollowersModalOpen(true)}
+              >
                 <div className="text-lg font-bold">{following.length}</div>
                 <div className="text-xs text-gray-500">Following</div>
               </div>
