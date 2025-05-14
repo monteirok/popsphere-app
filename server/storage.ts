@@ -384,10 +384,16 @@ export class MemStorage implements IStorage {
     const allPosts = Array.from(this.posts.values())
       .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
     
-    return Promise.all(allPosts.map(async post => {
+    // Filter out posts with invalid users first to avoid errors
+    const validPosts = [];
+    for (const post of allPosts) {
       const user = await this.getUser(post.userId);
-      if (!user) throw new Error('User not found for post');
-      
+      if (user) {
+        validPosts.push({ post, user });
+      }
+    }
+    
+    return validPosts.map(({ post, user }) => {
       const likesCount = Array.from(this.likes.values())
         .filter(like => like.postId === post.id)
         .length;
@@ -410,7 +416,7 @@ export class MemStorage implements IStorage {
         commentsCount,
         liked
       };
-    }));
+    });
   }
 
   // Like operations
