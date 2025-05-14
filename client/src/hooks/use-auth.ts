@@ -35,10 +35,10 @@ export function useAuth() {
 
   // Get current user session
   const { data: user, error } = useQuery<User | null>({
-    queryKey: ["/api/auth/session"],
+    queryKey: ["/api/user"],
     queryFn: async () => {
       try {
-        const response = await fetch("/api/auth/session", {
+        const response = await fetch("/api/user", {
           credentials: "include",
         });
         if (response.status === 401) {
@@ -55,11 +55,11 @@ export function useAuth() {
   // Login mutation
   const { mutate: login, isPending: isLoginPending } = useMutation({
     mutationFn: async (credentials: LoginCredentials) => {
-      const response = await apiRequest("POST", "/api/auth/login", credentials);
+      const response = await apiRequest("POST", "/api/login", credentials);
       return response.json();
     },
     onSuccess: (data) => {
-      queryClient.setQueryData(["/api/auth/session"], data);
+      queryClient.setQueryData(["/api/user"], data);
       setLocation("/");
       toast({
         title: "Welcome back!",

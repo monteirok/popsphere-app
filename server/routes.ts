@@ -1,162 +1,17 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import passport from "passport";
-import { Strategy as LocalStrategy } from "passport-local";
-import session from "express-session";
 import { z } from "zod";
 import { insertUserSchema, insertCollectibleSchema, insertTradeSchema, insertPostSchema, insertCommentSchema } from "@shared/schema";
-import { promisify } from "util";
+import { setupAuth, isAuthenticated } from "./auth";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Configure session
-  app.use(session({
-    secret: process.env.SESSION_SECRET || "popmart-collectors-community-secret",
-    resave: false,
-    saveUninitialized: false,
-    cookie: { 
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
-    }
-  }));
+  // Set up authentication with database session storage
+  setupAuth(app);
 
-  // Initialize passport
-  app.use(passport.initialize());
-  app.use(passport.session());
-
-  // Configure passport local strategy
-  passport.use(new LocalStrategy(async (username, password, done) => {
-    try {
-      const user = await storage.getUserByUsername(username);
-      if (!user) {
-        return done(null, false, { message: "Invalid username or password" });
-      }
-      
-      // In a real app, you'd compare hashed passwords
-      if (user.password !== password) {
-        return done(null, false, { message: "Invalid username or password" });
-      }
-      
-      return done(null, user);
-    } catch (err) {
-      return done(err);
-    }
-  }));
-
-  // Serialize and deserialize user
-  passport.serializeUser((user: any, done) => {
-    done(null, user.id);
-  });
-
-  passport.deserializeUser(async (id: number, done) => {
-    try {
-      const user = await storage.getUser(id);
-      done(null, user);
-    } catch (err) {
-      done(err, null);
-    }
-  });
-
-  // Middleware to check if user is authenticated
-  const isAuthenticated = (req: Request, res: Response, next: any) => {
-    if (req.isAuthenticated()) {
-      return next();
-    }
-    res.status(401).json({ message: "Unauthorized" });
-  };
-
-  // Auth routes
-  app.post("/api/auth/register", async (req, res) => {
-    try {
-      const result = insertUserSchema.safeParse(req.body);
-      
-      if (!result.success) {
-        return res.status(400).json({ message: "Invalid user data", errors: result.error.format() });
-      }
-      
-      const { username, email } = result.data;
-      
-      // Check if username or email already exists
-      const existingUsername = await storage.getUserByUsername(username);
-      if (existingUsername) {
-        return res.status(400).json({ message: "Username already taken" });
-      }
-      
-      const existingEmail = await storage.getUserByEmail(email);
-      if (existingEmail) {
-        return res.status(400).json({ message: "Email already registered" });
-      }
-      
-      // Create new user
-      const user = await storage.createUser(result.data);
-      
-      // Log in the user
-      req.login(user, (err) => {
-        if (err) {
-          return res.status(500).json({ message: "Login error after registration" });
-        }
-        return res.status(201).json({ 
-          id: user.id, 
-          username: user.username,
-          displayName: user.displayName,
-          email: user.email,
-          profileImage: user.profileImage,
-          bio: user.bio
-        });
-      });
-    } catch (error) {
-      console.error("Registration error:", error);
-      res.status(500).json({ message: "Server error during registration" });
-    }
-  });
-
-  app.post("/api/auth/login", (req, res, next) => {
-    passport.authenticate("local", (err, user, info) => {
-      if (err) {
-        return next(err);
-      }
-      if (!user) {
-        return res.status(401).json({ message: info.message || "Login failed" });
-      }
-      req.login(user, (err) => {
-        if (err) {
-          return next(err);
-        }
-        return res.json({ 
-          id: user.id, 
-          username: user.username,
-          displayName: user.displayName,
-          email: user.email,
-          profileImage: user.profileImage,
-          bio: user.bio
-        });
-      });
-    })(req, res, next);
-  });
-
-  app.post("/api/auth/logout", (req, res) => {
-    req.logout(function(err) {
-      if (err) { 
-        return res.status(500).json({ message: "Logout failed" });
-      }
-      res.json({ message: "Logged out successfully" });
-    });
-  });
-
-  app.get("/api/auth/session", (req, res) => {
-    if (req.isAuthenticated()) {
-      const user = req.user as any;
-      return res.json({ 
-        id: user.id, 
-        username: user.username,
-        displayName: user.displayName,
-        email: user.email,
-        profileImage: user.profileImage,
-        bio: user.bio
-      });
-    }
-    res.status(401).json({ message: "Not authenticated" });
-  });
+  // Auth routes are now handled by auth.ts
+  // Using the '/api/user' endpoint for user session info
+  // Using the '/api/register', '/api/login', and '/api/logout' endpoints for authentication
 
   // User routes
   app.get("/api/users/search", async (req, res) => {
