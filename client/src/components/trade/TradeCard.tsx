@@ -146,7 +146,7 @@ export default function TradeCard({ trade, isUserProposer }: TradeCardProps) {
             disabled={isPending}
             variant="outline"
             size="sm"
-            className="flex-1 bg-gray-200 hover:bg-gray-300 text-dark-grey rounded-full px-3 py-1.5 text-xs font-medium transition"
+            className="flex-1 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-dark-grey dark:text-gray-200 rounded-full px-3 py-1.5 text-xs font-medium transition"
           >
             Decline
           </Button>
