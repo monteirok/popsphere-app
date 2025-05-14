@@ -12,7 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/auth-provider";
 
 const registerSchema = z.object({
   username: z.string()

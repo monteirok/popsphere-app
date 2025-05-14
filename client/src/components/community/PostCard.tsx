@@ -12,7 +12,7 @@ import {
   Send
 } from "lucide-react";
 import { formatDate } from "@/lib/utils";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/auth-provider";
 import {
   DropdownMenu,
   DropdownMenuContent,

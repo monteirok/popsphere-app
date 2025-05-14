@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useLocation } from "wouter";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/auth-provider";
 
 export default function Home() {
   const { user } = useAuth();

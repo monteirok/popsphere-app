@@ -5,7 +5,7 @@ import { Input } from "../ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { getInitials } from "../../lib/utils";
 import { Button } from "../ui/button";
-import { useAuth } from "../../hooks/use-auth";
+import { useAuth } from "../../auth-provider";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "../../lib/queryClient";
 import NotificationDropdown from "../notification/NotificationDropdown";

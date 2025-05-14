@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useAuth } from "../hooks/use-auth";
+import { useAuth } from "../auth-provider";
 import CollectionHeader from "../components/collection/CollectionHeader";
 import CollectionGrid from "../components/collection/CollectionGrid";
 import CommunityFeedWidget from "../components/community/CommunityFeedWidget";

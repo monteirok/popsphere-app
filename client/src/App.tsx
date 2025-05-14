@@ -8,8 +8,8 @@ import Profile from "./pages/profile";
 import AuthPage from "./pages/auth-page";
 import Header from "./components/layout/Header";
 import MobileNavigation from "./components/layout/MobileNavigation";
-import { useAuth } from "./hooks/use-auth";
 import { Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
 
 function App() {
   const { user, isLoading } = useAuth();
