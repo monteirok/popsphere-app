@@ -419,6 +419,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(500).json({ message: "Failed to update trade status" });
       }
       
+      // Create a notification based on the status change
+      if (result.data.status === "accepted" || result.data.status === "rejected" || result.data.status === "completed") {
+        await createTradeStatusNotification(
+          tradeId, 
+          result.data.status as 'accepted' | 'rejected' | 'completed', 
+          trade.proposerId, 
+          trade.receiverId
+        );
+      }
+      
       // Get the full trade with details
       const tradeWithDetails = await storage.getTradeWithDetails(updatedTrade.id);
       
@@ -717,6 +727,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const like = await storage.createLike({ userId: user.id, postId });
       
+      // Create a notification for the post owner (if not self-like)
+      if (post.userId !== user.id) {
+        await createLikeNotification(user.id, postId, post.userId);
+      }
+      
       // Count likes for the post
       const likes = await storage.getPostLikes(postId);
       
@@ -835,6 +850,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const comment = await storage.createComment(result.data);
       
+      // Create a notification for the post owner (if not self-comment)
+      if (post.userId !== user.id) {
+        await createCommentNotification(user.id, postId, post.userId);
+      }
+      
       // Include user data in the response
       const userData = {
         id: user.id,
@@ -928,6 +948,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         followerId: user.id, 
         followingId
       });
+      
+      // Create a notification for the user being followed
+      await createFollowNotification(user.id, followingId);
       
       res.status(201).json({ message: "User followed successfully" });
     } catch (error) {
