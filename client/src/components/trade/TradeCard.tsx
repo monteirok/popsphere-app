@@ -82,18 +82,18 @@ export default function TradeCard({ trade, isUserProposer }: TradeCardProps) {
       
       <div className="flex items-center justify-between">
         <div className="flex-1">
-          <p className="text-xs text-gray-500 mb-1">You Give:</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">You Give:</p>
           <div className="flex items-center">
             <img 
               src={isUserProposer ? trade.proposerCollectible.image : trade.receiverCollectible.image} 
               alt={isUserProposer ? trade.proposerCollectible.name : trade.receiverCollectible.name} 
-              className="w-10 h-10 rounded-custom object-cover border border-gray-200"
+              className="w-10 h-10 rounded-custom object-cover border border-gray-200 dark:border-gray-700"
             />
             <div className="ml-2">
               <p className="text-xs font-medium">
                 {isUserProposer ? trade.proposerCollectible.name : trade.receiverCollectible.name}
               </p>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-500 dark:text-gray-400">
                 {isUserProposer ? trade.proposerCollectible.variant : trade.receiverCollectible.variant}
               </p>
             </div>
@@ -105,19 +105,19 @@ export default function TradeCard({ trade, isUserProposer }: TradeCardProps) {
         </div>
         
         <div className="flex-1">
-          <p className="text-xs text-gray-500 mb-1">You Receive:</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">You Receive:</p>
           <div className="flex items-center">
             <img 
               src={isUserProposer ? trade.receiverCollectible.image : trade.proposerCollectible.image} 
               alt={isUserProposer ? trade.receiverCollectible.name : trade.proposerCollectible.name} 
-              className="w-10 h-10 rounded-custom object-cover border border-gray-200"
+              className="w-10 h-10 rounded-custom object-cover border border-gray-200 dark:border-gray-700"
             />
             <div className="ml-2">
               <p className="text-xs font-medium">
                 {isUserProposer ? trade.receiverCollectible.name : trade.proposerCollectible.name}
               </p>
               <div className="flex items-center">
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-gray-500 dark:text-gray-400">
                   {isUserProposer ? trade.receiverCollectible.variant : trade.proposerCollectible.variant}
                 </p>
                 <RarityBadge 
@@ -153,7 +153,7 @@ export default function TradeCard({ trade, isUserProposer }: TradeCardProps) {
           <Button 
             variant="outline"
             size="sm"
-            className="bg-white border border-gray-200 text-dark-grey rounded-full w-8 h-8 flex items-center justify-center hover:bg-gray-100 transition p-0"
+            className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-dark-grey dark:text-gray-200 rounded-full w-8 h-8 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 transition p-0"
             onClick={(e) => {
               e.stopPropagation();
               setIsChatOpen(true);
