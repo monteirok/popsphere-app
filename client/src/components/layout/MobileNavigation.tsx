@@ -27,10 +27,10 @@ interface NavLinkProps {
 function NavLink({ href, icon, label, active }: NavLinkProps) {
   return (
     <Link href={href}>
-      <a className={`flex flex-col items-center py-2 flex-1 ${active ? 'text-pop-pink' : 'text-gray-500'}`}>
+      <div className={`flex flex-col items-center py-2 flex-1 cursor-pointer ${active ? 'text-pop-pink' : 'text-gray-500'}`}>
         {icon}
         <span className="text-xs mt-1">{label}</span>
-      </a>
+      </div>
     </Link>
   );
 }
