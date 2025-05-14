@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams, useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
@@ -9,6 +9,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { getInitials } from "@/lib/utils";
 import { useTheme } from "@/components/theme-provider";
+import { FileUpload } from "@/components/ui/file-upload";
 import FollowersModal from "@/components/profile/FollowersModal";
 import { 
   Edit, 
@@ -21,7 +22,8 @@ import {
   Settings,
   Sun,
   Moon,
-  Computer
+  Computer,
+  Image as ImageIcon
 } from "lucide-react";
 import {
   Dialog,
@@ -51,6 +53,7 @@ export default function Profile() {
   const [displayName, setDisplayName] = useState("");
   const [bio, setBio] = useState("");
   const [profileImage, setProfileImage] = useState("");
+  const [profileBanner, setProfileBanner] = useState("");
   
   // State for followers/following modal
   const [isFollowersModalOpen, setIsFollowersModalOpen] = useState(false);
@@ -64,6 +67,7 @@ export default function Profile() {
         setDisplayName(data.displayName || "");
         setBio(data.bio || "");
         setProfileImage(data.profileImage || "");
+        setProfileBanner(data.profileBanner || "");
       }
     },
   });
@@ -122,6 +126,7 @@ export default function Profile() {
         displayName,
         bio,
         profileImage,
+        profileBanner,
       });
       return response.json();
     },
