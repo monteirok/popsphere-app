@@ -159,6 +159,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // User routes
+  app.get("/api/users/search", async (req, res) => {
+    try {
+      const query = req.query.q as string;
+      
+      if (!query || query.trim().length < 2) {
+        return res.status(400).json({ message: "Search query too short. Minimum 2 characters required." });
+      }
+      
+      const users = await storage.searchUsers(query);
+      
+      // Return user data without sensitive information
+      const safeUsers = users.map(user => ({
+        id: user.id,
+        username: user.username,
+        displayName: user.displayName,
+        profileImage: user.profileImage,
+        bio: user.bio
+      }));
+      
+      res.json(safeUsers);
+    } catch (error) {
+      console.error("Error searching users:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+  
+  app.get("/api/users/recommended", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      
+      const recommendedUsers = await storage.getRecommendedUsers(user.id);
+      
+      // Return user data without sensitive information
+      const safeRecommendedUsers = recommendedUsers.map(user => ({
+        id: user.id,
+        username: user.username,
+        displayName: user.displayName,
+        profileImage: user.profileImage,
+        bio: user.bio
+      }));
+      
+      res.json(safeRecommendedUsers);
+    } catch (error) {
+      console.error("Error getting recommended users:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+  
   app.get("/api/users/:idOrUsername", async (req, res) => {
     try {
       const idOrUsername = req.params.idOrUsername;
