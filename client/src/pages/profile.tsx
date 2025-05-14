@@ -22,7 +22,6 @@ import {
   Settings,
   Sun,
   Moon,
-  Computer,
   Image as ImageIcon
 } from "lucide-react";
 import {
@@ -586,19 +585,7 @@ export default function Profile() {
                       {theme === 'dark' && <div className="h-3 w-3 rounded-full bg-pop-pink"></div>}
                     </div>
                     
-                    <div 
-                      className={`p-3 border rounded-lg flex items-center justify-between cursor-pointer hover:border-pop-pink ${theme === 'system' ? 'border-pop-pink bg-pink-50 dark:bg-pink-900/20' : 'border-gray-200 dark:border-gray-700'}`}
-                      onClick={() => setTheme('system')}
-                    >
-                      <div className="flex items-center">
-                        <Computer className="h-5 w-5 mr-3 text-blue-500" />
-                        <div>
-                          <p className="font-medium">System</p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">Match your system preferences</p>
-                        </div>
-                      </div>
-                      {theme === 'system' && <div className="h-3 w-3 rounded-full bg-pop-pink"></div>}
-                    </div>
+
                   </div>
                 </div>
               </div>
