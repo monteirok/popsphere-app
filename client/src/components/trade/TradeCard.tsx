@@ -59,7 +59,7 @@ export default function TradeCard({ trade, isUserProposer }: TradeCardProps) {
   const isNew = new Date(trade.createdAt).getTime() > Date.now() - 86400000; // 24 hours
   
   return (
-    <div className="trade-card bg-gray-50 rounded-custom p-3 mb-3 transition-transform duration-200 cursor-pointer">
+    <div className="trade-card bg-gray-50 dark:bg-gray-800 rounded-custom p-3 mb-3 transition-transform duration-200 cursor-pointer">
       <div className="flex items-center mb-2">
         <AvatarWithStatus
           src={isUserProposer ? trade.receiver.profileImage : trade.proposer.profileImage}
@@ -71,7 +71,7 @@ export default function TradeCard({ trade, isUserProposer }: TradeCardProps) {
           <p className="font-medium text-sm">
             {isUserProposer ? trade.receiver.displayName : trade.proposer.displayName}
           </p>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-gray-500 dark:text-gray-400">
             {isUserProposer ? "is considering your trade" : "wants to trade with you"}
           </p>
         </div>

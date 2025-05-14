@@ -170,7 +170,7 @@ export default function FollowersModal({
               {following.length > 0 ? (
                 following.map(followedUser => renderUserItem(followedUser, true))
               ) : (
-                <div className="py-8 text-center text-gray-500">
+                <div className="py-8 text-center text-gray-500 dark:text-gray-400">
                   <p>{isOwnProfile ? "You're" : `${username} is`} not following anyone yet.</p>
                 </div>
               )}

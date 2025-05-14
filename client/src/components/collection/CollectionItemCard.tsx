@@ -49,7 +49,7 @@ export default function CollectionItemCard({ collectible }: CollectionItemCardPr
   return (
     <>
       <div className="collection-item relative group">
-        <div className="aspect-square rounded-custom overflow-hidden bg-gray-100 relative">
+        <div className="aspect-square rounded-custom overflow-hidden bg-gray-100 dark:bg-gray-800 relative">
           <img 
             src={collectible.image} 
             alt={`${collectible.name} - ${collectible.variant}`}
@@ -64,7 +64,7 @@ export default function CollectionItemCard({ collectible }: CollectionItemCardPr
         <div className="mt-2">
           <h3 className="font-medium truncate">{collectible.name}</h3>
           <div className="flex justify-between items-center">
-            <p className="text-xs text-gray-500">{collectible.variant}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{collectible.variant}</p>
             <RarityBadge rarity={collectible.rarity} />
           </div>
         </div>
