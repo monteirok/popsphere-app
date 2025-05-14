@@ -29,6 +29,21 @@ export function useAuth() {
     error,
   } = useQuery<User | null>({
     queryKey: ["/api/user"],
+    queryFn: async () => {
+      try {
+        const response = await fetch("/api/user");
+        if (response.status === 401) {
+          return null;
+        }
+        if (!response.ok) {
+          throw new Error("Failed to fetch user data");
+        }
+        return await response.json();
+      } catch (error) {
+        console.error("Error fetching user:", error);
+        return null;
+      }
+    },
     refetchOnWindowFocus: false,
   });
 
