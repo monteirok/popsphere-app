@@ -159,14 +159,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // User routes
-  app.get("/api/users/:id", async (req, res) => {
+  app.get("/api/users/:idOrUsername", async (req, res) => {
     try {
-      const userId = parseInt(req.params.id);
-      if (isNaN(userId)) {
-        return res.status(400).json({ message: "Invalid user ID" });
+      const idOrUsername = req.params.idOrUsername;
+      let user;
+      
+      // Check if parameter is a number (id) or string (username)
+      const userId = parseInt(idOrUsername, 10);
+      
+      if (!isNaN(userId)) {
+        // If it's a valid number, fetch by ID
+        user = await storage.getUser(userId);
+      } else {
+        // Otherwise, treat it as a username
+        user = await storage.getUserByUsername(idOrUsername);
       }
       
-      const user = await storage.getUser(userId);
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -848,11 +856,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/users/:id/followers", async (req, res) => {
+  app.get("/api/users/:idOrUsername/followers", async (req, res) => {
     try {
-      const userId = parseInt(req.params.id);
-      if (isNaN(userId)) {
-        return res.status(400).json({ message: "Invalid user ID" });
+      const idOrUsername = req.params.idOrUsername;
+      let userId;
+      
+      // Check if parameter is a number (id) or string (username)
+      const parsedId = parseInt(idOrUsername, 10);
+      
+      if (!isNaN(parsedId)) {
+        // If it's a valid number, use it directly
+        userId = parsedId;
+      } else {
+        // Otherwise, find the user by username first
+        const user = await storage.getUserByUsername(idOrUsername);
+        if (!user) {
+          return res.status(404).json({ message: "User not found" });
+        }
+        userId = user.id;
       }
       
       const followers = await storage.getUserFollowers(userId);
@@ -872,11 +893,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/users/:id/following", async (req, res) => {
+  app.get("/api/users/:idOrUsername/following", async (req, res) => {
     try {
-      const userId = parseInt(req.params.id);
-      if (isNaN(userId)) {
-        return res.status(400).json({ message: "Invalid user ID" });
+      const idOrUsername = req.params.idOrUsername;
+      let userId;
+      
+      // Check if parameter is a number (id) or string (username)
+      const parsedId = parseInt(idOrUsername, 10);
+      
+      if (!isNaN(parsedId)) {
+        // If it's a valid number, use it directly
+        userId = parsedId;
+      } else {
+        // Otherwise, find the user by username first
+        const user = await storage.getUserByUsername(idOrUsername);
+        if (!user) {
+          return res.status(404).json({ message: "User not found" });
+        }
+        userId = user.id;
       }
       
       const following = await storage.getUserFollowing(userId);
