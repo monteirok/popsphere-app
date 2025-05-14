@@ -112,6 +112,21 @@ export const insertFollowSchema = createInsertSchema(follows).omit({
   createdAt: true,
 });
 
+// Trade chat messages schema
+export const chatMessages = pgTable("chat_messages", {
+  id: serial("id").primaryKey(),
+  tradeId: integer("trade_id").notNull().references(() => trades.id, { onDelete: "cascade" }),
+  senderId: integer("sender_id").notNull().references(() => users.id),
+  message: text("message").notNull(),
+  isPinned: boolean("is_pinned").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertChatMessageSchema = createInsertSchema(chatMessages).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types for frontend usage
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -133,6 +148,9 @@ export type InsertComment = z.infer<typeof insertCommentSchema>;
 
 export type Follow = typeof follows.$inferSelect;
 export type InsertFollow = z.infer<typeof insertFollowSchema>;
+
+export type ChatMessage = typeof chatMessages.$inferSelect;
+export type InsertChatMessage = z.infer<typeof insertChatMessageSchema>;
 
 // Notifications schema
 export const notifications = pgTable("notifications", {
@@ -176,4 +194,8 @@ export type PostWithDetails = Post & {
 
 export type NotificationWithActor = Notification & {
   actor?: User;
+};
+
+export type ChatMessageWithSender = ChatMessage & {
+  sender: User;
 };

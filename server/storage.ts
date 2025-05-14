@@ -101,6 +101,13 @@ export interface IStorage {
   markAllUserNotificationsAsRead(userId: number): Promise<boolean>;
   getUnreadNotificationCount(userId: number): Promise<number>;
   deleteNotification(id: number): Promise<boolean>;
+  
+  // Chat operations
+  getTradeMessages(tradeId: number): Promise<ChatMessageWithSender[]>;
+  createChatMessage(message: InsertChatMessage): Promise<ChatMessage>;
+  getPinnedTradeMessage(tradeId: number): Promise<ChatMessageWithSender | undefined>;
+  pinChatMessage(messageId: number): Promise<boolean>;
+  unpinChatMessage(messageId: number): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -767,6 +774,107 @@ export class DatabaseStorage implements IStorage {
       .returning();
     
     return result.length > 0;
+  }
+
+  // Chat operations
+  async getTradeMessages(tradeId: number): Promise<ChatMessageWithSender[]> {
+    const messages = await db
+      .select()
+      .from(chatMessages)
+      .where(eq(chatMessages.tradeId, tradeId))
+      .orderBy(asc(chatMessages.createdAt));
+    
+    const messagesWithSenders: ChatMessageWithSender[] = [];
+    
+    for (const message of messages) {
+      const [sender] = await db
+        .select({
+          id: users.id,
+          username: users.username,
+          displayName: users.displayName,
+          profileImage: users.profileImage
+        })
+        .from(users)
+        .where(eq(users.id, message.senderId));
+      
+      messagesWithSenders.push({
+        ...message,
+        sender: sender as User
+      });
+    }
+    
+    return messagesWithSenders;
+  }
+
+  async createChatMessage(messageData: InsertChatMessage): Promise<ChatMessage> {
+    const [message] = await db
+      .insert(chatMessages)
+      .values(messageData)
+      .returning();
+    
+    return message;
+  }
+
+  async getPinnedTradeMessage(tradeId: number): Promise<ChatMessageWithSender | undefined> {
+    const [pinnedMessage] = await db
+      .select()
+      .from(chatMessages)
+      .where(and(
+        eq(chatMessages.tradeId, tradeId),
+        eq(chatMessages.isPinned, true)
+      ));
+    
+    if (!pinnedMessage) return undefined;
+    
+    const [sender] = await db
+      .select({
+        id: users.id,
+        username: users.username,
+        displayName: users.displayName,
+        profileImage: users.profileImage
+      })
+      .from(users)
+      .where(eq(users.id, pinnedMessage.senderId));
+    
+    return {
+      ...pinnedMessage,
+      sender: sender as User
+    };
+  }
+
+  async pinChatMessage(messageId: number): Promise<boolean> {
+    // First, get the message to find its trade
+    const [message] = await db
+      .select()
+      .from(chatMessages)
+      .where(eq(chatMessages.id, messageId));
+    
+    if (!message) return false;
+    
+    // Unpin any previously pinned messages in this trade
+    await db
+      .update(chatMessages)
+      .set({ isPinned: false })
+      .where(eq(chatMessages.tradeId, message.tradeId));
+    
+    // Pin the requested message
+    const [updatedMessage] = await db
+      .update(chatMessages)
+      .set({ isPinned: true })
+      .where(eq(chatMessages.id, messageId))
+      .returning();
+    
+    return !!updatedMessage;
+  }
+
+  async unpinChatMessage(messageId: number): Promise<boolean> {
+    const [updatedMessage] = await db
+      .update(chatMessages)
+      .set({ isPinned: false })
+      .where(eq(chatMessages.id, messageId))
+      .returning();
+    
+    return !!updatedMessage;
   }
 }
 
