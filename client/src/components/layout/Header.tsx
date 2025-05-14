@@ -164,9 +164,6 @@ export default function Header() {
         </div>
         
         <div className="flex items-center space-x-4">
-          <Button variant="default" className="hidden md:flex bg-pop-pink hover:bg-opacity-90 text-white rounded-full px-4 py-2 font-medium text-sm transition">
-            Add Item
-          </Button>
           <NotificationDropdown />
           <MessageSquare className="h-6 w-6 text-dark-grey cursor-pointer" />
           <ThemeToggle />
