@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { MessageCircle, ArrowLeftRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import RarityBadge from "@/components/ui/rarity-badge";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { ChatView } from "@/components/chat";
 
 interface TradeCardProps {
@@ -246,6 +246,10 @@ export default function TradeCard({ trade, isUserProposer }: TradeCardProps) {
       {/* Chat Dialog */}
       <Dialog open={isChatOpen} onOpenChange={setIsChatOpen}>
         <DialogContent className="sm:max-w-[600px] p-0 overflow-hidden">
+          <DialogTitle className="sr-only">Trade Chat with {isUserProposer ? trade.receiver.displayName : trade.proposer.displayName}</DialogTitle>
+          <DialogDescription className="sr-only">
+            Chat window for discussing trade details for {isUserProposer ? trade.proposerCollectible.name : trade.receiverCollectible.name}
+          </DialogDescription>
           <ChatView trade={trade} />
         </DialogContent>
       </Dialog>
