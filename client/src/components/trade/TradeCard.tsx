@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { TradeWithDetails } from "@shared/schema";
@@ -6,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { MessageCircle, ArrowLeftRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import RarityBadge from "@/components/ui/rarity-badge";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { ChatView } from "@/components/chat";
 
 interface TradeCardProps {
   trade: TradeWithDetails;
@@ -15,6 +18,7 @@ interface TradeCardProps {
 export default function TradeCard({ trade, isUserProposer }: TradeCardProps) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const [isChatOpen, setIsChatOpen] = useState(false);
   
   const { mutate: updateTradeStatus, isPending } = useMutation({
     mutationFn: async (status: string) => {
@@ -150,6 +154,10 @@ export default function TradeCard({ trade, isUserProposer }: TradeCardProps) {
             variant="outline"
             size="sm"
             className="bg-white border border-gray-200 text-dark-grey rounded-full w-8 h-8 flex items-center justify-center hover:bg-gray-100 transition p-0"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsChatOpen(true);
+            }}
           >
             <MessageCircle className="h-4 w-4" />
           </Button>
@@ -178,7 +186,7 @@ export default function TradeCard({ trade, isUserProposer }: TradeCardProps) {
               Trade accepted! Coordinate with the other collector to complete the exchange.
             </div>
           </div>
-          <div className="flex justify-center mt-2">
+          <div className="flex justify-center gap-2 mt-2">
             <Button 
               onClick={() => updateTradeStatus("completed")}
               disabled={isPending}
@@ -186,6 +194,17 @@ export default function TradeCard({ trade, isUserProposer }: TradeCardProps) {
               className="bg-golden-yellow hover:bg-opacity-90 text-white rounded-full px-3 py-1.5 text-xs font-medium transition"
             >
               Mark as Completed
+            </Button>
+            <Button 
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsChatOpen(true);
+              }}
+              variant="outline"
+              size="sm"
+              className="bg-white hover:bg-gray-100 border border-gray-200 rounded-full px-3 py-1.5 text-xs font-medium transition flex items-center gap-1"
+            >
+              <MessageCircle className="h-3 w-3" /> Chat
             </Button>
           </div>
         </div>
@@ -201,13 +220,35 @@ export default function TradeCard({ trade, isUserProposer }: TradeCardProps) {
       )}
       
       {trade.status === "completed" && (
-        <div className="mt-3 p-2 bg-amber-50 border border-amber-200 rounded-custom text-center text-xs text-amber-700">
-          <div className="flex items-center justify-center">
-            <div className="w-2 h-2 bg-golden-yellow rounded-full mr-2"></div>
-            Trade successfully completed!
+        <div className="mt-3">
+          <div className="p-2 bg-amber-50 border border-amber-200 rounded-custom text-center text-xs text-amber-700">
+            <div className="flex items-center justify-center">
+              <div className="w-2 h-2 bg-golden-yellow rounded-full mr-2"></div>
+              Trade successfully completed!
+            </div>
+          </div>
+          <div className="flex justify-center mt-2">
+            <Button 
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsChatOpen(true);
+              }}
+              variant="outline"
+              size="sm"
+              className="bg-white hover:bg-gray-100 border border-gray-200 rounded-full px-3 py-1.5 text-xs font-medium transition flex items-center gap-1"
+            >
+              <MessageCircle className="h-3 w-3" /> View Chat History
+            </Button>
           </div>
         </div>
       )}
+      
+      {/* Chat Dialog */}
+      <Dialog open={isChatOpen} onOpenChange={setIsChatOpen}>
+        <DialogContent className="sm:max-w-[600px] p-0 overflow-hidden">
+          <ChatView trade={trade} />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
