@@ -1,24 +1,15 @@
 import { useState, useEffect } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
-import { apiRequest } from "../lib/queryClient";
-import { useToast } from "./use-toast";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useToast } from "../hooks/use-toast";
+import { User } from "../../../shared/schema";
 
-export interface User {
-  id: number;
-  username: string;
-  displayName: string;
-  email: string;
-  profileImage?: string;
-  bio?: string;
-}
-
-interface LoginCredentials {
+export interface LoginCredentials {
   username: string;
   password: string;
 }
 
-interface RegisterData {
+export interface RegisterData {
   username: string;
   password: string;
   email: string;
@@ -28,58 +19,67 @@ interface RegisterData {
 }
 
 export function useAuth() {
-  const queryClient = useQueryClient();
-  const [isLoading, setIsLoading] = useState(true);
   const [, setLocation] = useLocation();
+  const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  // Get current user session
-  const { data: user, error } = useQuery<User | null>({
+  const {
+    data: user,
+    isLoading,
+    error,
+  } = useQuery<User | null>({
     queryKey: ["/api/user"],
-    queryFn: async () => {
-      try {
-        const response = await fetch("/api/user", {
-          credentials: "include",
-        });
-        if (response.status === 401) {
-          return null;
-        }
-        return response.json();
-      } catch (error) {
-        return null;
-      }
-    },
-    retry: false,
+    refetchOnWindowFocus: false,
   });
 
-  // Login mutation
-  const { mutate: login, isPending: isLoginPending } = useMutation({
+  const loginMutation = useMutation({
     mutationFn: async (credentials: LoginCredentials) => {
-      const response = await apiRequest("POST", "/api/login", credentials);
-      return response.json();
+      const response = await fetch("/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(credentials),
+      });
+
+      if (!response.ok) {
+        throw new Error("Login failed");
+      }
+
+      return await response.json();
     },
     onSuccess: (data) => {
       queryClient.setQueryData(["/api/user"], data);
       setLocation("/");
       toast({
-        title: "Welcome back!",
-        description: `You are now logged in as ${data.displayName}.`,
+        title: "Login successful",
+        description: `Welcome back, ${data.displayName}!`,
       });
     },
-    onError: (error: any) => {
+    onError: () => {
       toast({
         title: "Login failed",
-        description: error.message || "Invalid username or password.",
+        description: "Incorrect username or password",
         variant: "destructive",
       });
     },
   });
 
-  // Register mutation
-  const { mutate: register, isPending: isRegisterPending } = useMutation({
+  const registerMutation = useMutation({
     mutationFn: async (data: RegisterData) => {
-      const response = await apiRequest("POST", "/api/register", data);
-      return response.json();
+      const response = await fetch("/api/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        throw new Error("Registration failed");
+      }
+
+      return await response.json();
     },
     onSuccess: (data) => {
       queryClient.setQueryData(["/api/user"], data);
@@ -89,25 +89,29 @@ export function useAuth() {
         description: `Welcome to PopCollect, ${data.displayName}!`,
       });
     },
-    onError: (error: any) => {
+    onError: () => {
       toast({
         title: "Registration failed",
-        description: error.message || "Could not create your account. Please try again.",
+        description: "Could not create your account. Please try again.",
         variant: "destructive",
       });
     },
   });
 
-  // Logout mutation
-  const { mutate: logout } = useMutation({
+  const logoutMutation = useMutation({
     mutationFn: async () => {
-      const response = await apiRequest("POST", "/api/logout", {});
-      return response.json();
+      const response = await fetch("/api/logout", {
+        method: "POST",
+      });
+
+      if (!response.ok) {
+        throw new Error("Logout failed");
+      }
     },
     onSuccess: () => {
       queryClient.setQueryData(["/api/user"], null);
       queryClient.invalidateQueries({ queryKey: ["/api/user"] });
-      setLocation("/login");
+      setLocation("/auth");
       toast({
         title: "Logged out",
         description: "You have been successfully logged out.",
@@ -122,20 +126,14 @@ export function useAuth() {
     },
   });
 
-  // Update loading state when query completes
-  useEffect(() => {
-    if (user !== undefined || error) {
-      setIsLoading(false);
-    }
-  }, [user, error]);
-
   return {
     user,
     isLoading,
-    login,
-    register,
-    logout,
-    isLoginPending,
-    isRegisterPending,
+    error,
+    login: loginMutation.mutate,
+    isLoginPending: loginMutation.isPending,
+    register: registerMutation.mutate,
+    isRegisterPending: registerMutation.isPending,
+    logout: logoutMutation.mutate,
   };
 }
