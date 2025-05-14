@@ -25,7 +25,7 @@ import {
   TradeWithDetails,
   PostWithDetails 
 } from '@shared/schema';
-import { eq, and, or, desc, asc, sql, inArray } from 'drizzle-orm';
+import { eq, and, or, desc, asc, sql, inArray, ne } from 'drizzle-orm';
 import connectPg from "connect-pg-simple";
 import session from "express-session";
 import { alias } from 'drizzle-orm/pg-core';
@@ -652,7 +652,7 @@ export class DatabaseStorage implements IStorage {
       .innerJoin(collectibles, eq(users.id, collectibles.userId))
       .where(
         and(
-          sql`${users.id} NOT IN (${followingUserIds.length > 0 ? followingUserIds.join(',') : 0})`,
+          ne(users.id, userId), // Not the current user
           inArray(collectibles.series, userSeries)
         )
       )
