@@ -518,15 +518,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get the sender details to return a complete message
       const sender = await storage.getUser(user.id);
       
-      res.status(201).json({
-        ...chatMessage,
-        sender: {
-          id: sender.id,
-          username: sender.username,
-          displayName: sender.displayName,
-          profileImage: sender.profileImage
-        }
-      });
+      if (sender) {
+        res.status(201).json({
+          ...chatMessage,
+          sender: {
+            id: sender.id,
+            username: sender.username,
+            displayName: sender.displayName,
+            profileImage: sender.profileImage
+          }
+        });
+      } else {
+        res.status(201).json(chatMessage);
+      }
     } catch (error) {
       console.error("Error creating chat message:", error);
       res.status(500).json({ message: "Server error" });
