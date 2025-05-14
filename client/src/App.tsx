@@ -7,11 +7,14 @@ import Collection from "./pages/collection";
 import Trades from "./pages/trades";
 import Community from "./pages/community";
 import Profile from "./pages/profile";
-import Login from "./pages/auth/login";
-import Register from "./pages/auth/register";
+import AuthPage from "./pages/auth-page";
 import Header from "./components/layout/Header";
 import MobileNavigation from "./components/layout/MobileNavigation";
 import { useAuth } from "./hooks/use-auth";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Loader2 } from "lucide-react";
+
+const queryClient = new QueryClient();
 
 function App() {
   const { user, isLoading } = useAuth();
@@ -19,41 +22,45 @@ function App() {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-pop-pink"></div>
+        <Loader2 className="h-12 w-12 animate-spin text-pop-pink" />
       </div>
     );
   }
   
   return (
-    <div className="bg-gray-50 min-h-screen flex flex-col">
-      {user ? (
-        // Authenticated layout
-        <>
-          <Header />
-          <main className="container mx-auto px-4 py-6 flex-grow">
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <div className="bg-gray-50 min-h-screen flex flex-col">
+          {user ? (
+            // Authenticated layout
+            <>
+              <Header />
+              <main className="container mx-auto px-4 py-6 flex-grow">
+                <Switch>
+                  <Route path="/" component={Home} />
+                  <Route path="/collection" component={Collection} />
+                  <Route path="/trades" component={Trades} />
+                  <Route path="/community" component={Community} />
+                  <Route path="/profile" component={Profile} />
+                  <Route path="/profile/:username" component={Profile} />
+                  <Route component={NotFound} />
+                </Switch>
+              </main>
+              <MobileNavigation />
+            </>
+          ) : (
+            // Unauthenticated layout
             <Switch>
-              <Route path="/" component={Home} />
-              <Route path="/collection" component={Collection} />
-              <Route path="/trades" component={Trades} />
-              <Route path="/community" component={Community} />
-              <Route path="/profile" component={Profile} />
-              <Route path="/profile/:username" component={Profile} />
-              <Route component={NotFound} />
+              <Route path="/auth" component={AuthPage} />
+              <Route>
+                <AuthPage />
+              </Route>
             </Switch>
-          </main>
-          <MobileNavigation />
-        </>
-      ) : (
-        // Unauthenticated layout
-        <Switch>
-          <Route path="/login" component={Login} />
-          <Route path="/register" component={Register} />
-          <Route>
-            <Login />
-          </Route>
-        </Switch>
-      )}
-    </div>
+          )}
+          <Toaster />
+        </div>
+      </TooltipProvider>
+    </QueryClientProvider>
   );
 }
 
