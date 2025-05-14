@@ -1,12 +1,15 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
 import TradeCard from "@/components/trade/TradeCard";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus } from "lucide-react";
+import TradeModal from "@/components/trade/TradeModal";
 
 export default function Trades() {
   const { user } = useAuth();
+  const [isTradeModalOpen, setIsTradeModalOpen] = useState(false);
   
   const { data: trades = [], isLoading } = useQuery({
     queryKey: ["/api/trades"],
@@ -32,7 +35,10 @@ export default function Trades() {
       <div className="bg-white rounded-custom p-4 shadow-soft mb-6">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-bold font-nunito">Trade Center</h1>
-          <Button className="bg-pop-pink hover:bg-opacity-90 rounded-full">
+          <Button 
+            className="bg-pop-pink hover:bg-opacity-90 rounded-full"
+            onClick={() => setIsTradeModalOpen(true)}
+          >
             <Plus className="mr-1 h-4 w-4" /> New Trade
           </Button>
         </div>
@@ -150,6 +156,12 @@ export default function Trades() {
           </TabsContent>
         </Tabs>
       </div>
+      
+      {/* Trade Modal */}
+      <TradeModal
+        open={isTradeModalOpen}
+        onOpenChange={setIsTradeModalOpen}
+      />
     </div>
   );
 }
