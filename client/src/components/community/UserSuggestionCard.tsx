@@ -67,7 +67,7 @@ export default function UserSuggestionCard({ user }: UserSuggestionCardProps) {
           />
           <div>
             <p className="font-medium text-sm">{user.displayName}</p>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-500 dark:text-gray-400">
               {user.itemsCount ? `${user.itemsCount} items` : ""}
               {user.itemsCount && user.matchPercentage ? " · " : ""}
               {user.matchPercentage ? `${user.matchPercentage}% match` : ""}
@@ -82,8 +82,8 @@ export default function UserSuggestionCard({ user }: UserSuggestionCardProps) {
         size="sm"
         variant={isFollowing ? "outline" : "default"}
         className={isFollowing 
-          ? "bg-gray-100 hover:bg-gray-200 text-dark-grey rounded-full text-xs px-3 py-1 font-medium transition" 
-          : "bg-pop-pink hover:bg-opacity-90 text-white rounded-full text-xs px-3 py-1 font-medium transition"
+          ? "bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-dark-grey dark:text-gray-200 rounded-full text-xs px-3 py-1 font-medium transition" 
+          : "bg-pop-pink hover:bg-opacity-90 dark:bg-brand-dark dark:hover:bg-opacity-90 text-white rounded-full text-xs px-3 py-1 font-medium transition"
         }
       >
         {isFollowing ? "Following" : "Follow"}

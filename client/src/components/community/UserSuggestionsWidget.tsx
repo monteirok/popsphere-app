@@ -15,15 +15,15 @@ export default function UserSuggestionsWidget() {
   const limitedUsers = (recommendedUsers as any[]).slice(0, 3);
   
   return (
-    <div className="bg-white rounded-custom p-4 shadow-soft">
+    <div className="bg-white dark:bg-gray-800 rounded-custom p-4 shadow-soft dark:shadow-soft-dark">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-bold font-nunito">Discover Collectors</h2>
-        <a href="/community" className="text-pop-pink text-sm font-medium">See All</a>
+        <a href="/community" className="text-pop-pink dark:text-brand-dark text-sm font-medium">See All</a>
       </div>
       
       {isLoading ? (
         <div className="py-6 flex justify-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-pop-pink"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-pop-pink dark:border-brand-dark"></div>
         </div>
       ) : limitedUsers.length > 0 ? (
         <div className="space-y-3">
@@ -40,7 +40,7 @@ export default function UserSuggestionsWidget() {
         </div>
       ) : (
         <div className="py-6 text-center">
-          <p className="text-gray-500">No recommendations available</p>
+          <p className="text-gray-500 dark:text-gray-400">No recommendations available</p>
         </div>
       )}
     </div>
