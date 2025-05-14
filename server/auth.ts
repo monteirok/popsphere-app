@@ -61,10 +61,14 @@ export function setupAuth(app: Express) {
   passport.use(
     new LocalStrategy(async (username, password, done) => {
       try {
-        const [user] = await db
+        // Get all users and filter by case-insensitive username match
+        const allUsers = await db
           .select()
-          .from(users)
-          .where(eq(users.username, username));
+          .from(users);
+        
+        const user = allUsers.find(u => 
+          u.username.toLowerCase() === username.toLowerCase()
+        );
 
         if (!user || !(await comparePasswords(password, user.password))) {
           return done(null, false);
@@ -105,13 +109,17 @@ export function setupAuth(app: Express) {
 
   app.post("/api/register", async (req, res, next) => {
     try {
-      // Check if username already exists
-      const existingUserByUsername = await db
+      // Get all users for case-insensitive username check
+      const allUsers = await db
         .select()
-        .from(users)
-        .where(eq(users.username, req.body.username));
+        .from(users);
+      
+      // Check if username already exists (case-insensitive)
+      const existingUserByUsername = allUsers.find(u => 
+        u.username.toLowerCase() === req.body.username.toLowerCase()
+      );
 
-      if (existingUserByUsername.length > 0) {
+      if (existingUserByUsername) {
         return res.status(400).json({ message: "Username already exists" });
       }
 
