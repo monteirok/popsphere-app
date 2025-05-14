@@ -552,42 +552,7 @@ export default function Profile() {
               <h2 className="text-xl font-bold mb-4">Settings</h2>
               
               <div className="space-y-6">
-                <div>
-                  <h3 className="text-lg font-semibold mb-2">Theme Preferences</h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Choose how PopSphere looks to you</p>
-                  
-                  <div className="flex flex-col space-y-3">
-                    <div 
-                      className={`p-3 border rounded-lg flex items-center justify-between cursor-pointer hover:border-pop-pink ${theme === 'light' ? 'border-pop-pink bg-pink-50 dark:bg-pink-900/20' : 'border-gray-200 dark:border-gray-700'}`}
-                      onClick={() => setTheme('light')}
-                    >
-                      <div className="flex items-center">
-                        <Sun className="h-5 w-5 mr-3 text-amber-500" />
-                        <div>
-                          <p className="font-medium">Light</p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">Use the light theme</p>
-                        </div>
-                      </div>
-                      {theme === 'light' && <div className="h-3 w-3 rounded-full bg-pop-pink"></div>}
-                    </div>
-                    
-                    <div 
-                      className={`p-3 border rounded-lg flex items-center justify-between cursor-pointer hover:border-pop-pink ${theme === 'dark' ? 'border-pop-pink bg-pink-50 dark:bg-pink-900/20' : 'border-gray-200 dark:border-gray-700'}`}
-                      onClick={() => setTheme('dark')}
-                    >
-                      <div className="flex items-center">
-                        <Moon className="h-5 w-5 mr-3 text-indigo-500" />
-                        <div>
-                          <p className="font-medium">Dark</p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">Use the dark theme</p>
-                        </div>
-                      </div>
-                      {theme === 'dark' && <div className="h-3 w-3 rounded-full bg-pop-pink"></div>}
-                    </div>
-                    
-
-                  </div>
-                </div>
+                {/* Theme section removed as requested */}
               </div>
             </div>
           </TabsContent>
