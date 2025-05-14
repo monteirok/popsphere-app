@@ -75,14 +75,20 @@ export default function Profile() {
   
   // Fetch user's followers
   const { data: followers = [], isLoading: isLoadingFollowers } = useQuery({
-    queryKey: [`/api/users/${profileUser?.id}/followers`],
-    enabled: !!profileUser?.id,
+    queryKey: [username 
+      ? `/api/users/${username}/followers` 
+      : `/api/users/${profileUser?.id}/followers`
+    ],
+    enabled: !!profileUser?.id || !!username,
   });
   
   // Fetch user's following
   const { data: following = [], isLoading: isLoadingFollowing } = useQuery({
-    queryKey: [`/api/users/${profileUser?.id}/following`],
-    enabled: !!profileUser?.id,
+    queryKey: [username 
+      ? `/api/users/${username}/following` 
+      : `/api/users/${profileUser?.id}/following`
+    ],
+    enabled: !!profileUser?.id || !!username,
   });
   
   // Fetch user's trades
@@ -121,16 +127,18 @@ export default function Profile() {
   // Follow/unfollow mutation
   const { mutate: toggleFollow, isPending: isFollowPending } = useMutation({
     mutationFn: async (isFollowing: boolean) => {
+      const userIdentifier = username || profileUser?.id;
       if (isFollowing) {
-        const response = await apiRequest("DELETE", `/api/users/${profileUser?.id}/follow`, {});
+        const response = await apiRequest("DELETE", `/api/users/${userIdentifier}/follow`, {});
         return response.json();
       } else {
-        const response = await apiRequest("POST", `/api/users/${profileUser?.id}/follow`, {});
+        const response = await apiRequest("POST", `/api/users/${userIdentifier}/follow`, {});
         return response.json();
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/users/${profileUser?.id}/followers`] });
+      const userIdentifier = username || profileUser?.id;
+      queryClient.invalidateQueries({ queryKey: [`/api/users/${userIdentifier}/followers`] });
       toast({
         title: "Success",
         description: "Follow status updated.",

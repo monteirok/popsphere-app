@@ -791,11 +791,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Follow routes
-  app.post("/api/users/:id/follow", isAuthenticated, async (req, res) => {
+  app.post("/api/users/:idOrUsername/follow", isAuthenticated, async (req, res) => {
     try {
-      const followingId = parseInt(req.params.id);
-      if (isNaN(followingId)) {
-        return res.status(400).json({ message: "Invalid user ID" });
+      const idOrUsername = req.params.idOrUsername;
+      let followingId;
+      
+      // Check if parameter is a number (id) or string (username)
+      const parsedId = parseInt(idOrUsername, 10);
+      
+      if (!isNaN(parsedId)) {
+        // If it's a valid number, use it directly
+        followingId = parsedId;
+        
+        // Check if the user to follow exists
+        const userToFollow = await storage.getUser(followingId);
+        if (!userToFollow) {
+          return res.status(404).json({ message: "User not found" });
+        }
+      } else {
+        // Otherwise, find the user by username first
+        const userToFollow = await storage.getUserByUsername(idOrUsername);
+        if (!userToFollow) {
+          return res.status(404).json({ message: "User not found" });
+        }
+        followingId = userToFollow.id;
       }
       
       const user = req.user as any;
@@ -803,12 +822,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Cannot follow yourself
       if (followingId === user.id) {
         return res.status(400).json({ message: "You cannot follow yourself" });
-      }
-      
-      // Check if the user to follow exists
-      const userToFollow = await storage.getUser(followingId);
-      if (!userToFollow) {
-        return res.status(404).json({ message: "User not found" });
       }
       
       // Check if already following
@@ -829,11 +842,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/users/:id/follow", isAuthenticated, async (req, res) => {
+  app.delete("/api/users/:idOrUsername/follow", isAuthenticated, async (req, res) => {
     try {
-      const followingId = parseInt(req.params.id);
-      if (isNaN(followingId)) {
-        return res.status(400).json({ message: "Invalid user ID" });
+      const idOrUsername = req.params.idOrUsername;
+      let followingId;
+      
+      // Check if parameter is a number (id) or string (username)
+      const parsedId = parseInt(idOrUsername, 10);
+      
+      if (!isNaN(parsedId)) {
+        // If it's a valid number, use it directly
+        followingId = parsedId;
+      } else {
+        // Otherwise, find the user by username first
+        const userToUnfollow = await storage.getUserByUsername(idOrUsername);
+        if (!userToUnfollow) {
+          return res.status(404).json({ message: "User not found" });
+        }
+        followingId = userToUnfollow.id;
       }
       
       const user = req.user as any;
