@@ -8,6 +8,7 @@ import {
   comments, 
   follows,
   notifications,
+  chatMessages,
   User,
   Collectible,
   Trade,
@@ -16,6 +17,7 @@ import {
   Like,
   Follow,
   Notification,
+  ChatMessage,
   InsertUser,
   InsertCollectible,
   InsertTrade,
@@ -24,12 +26,14 @@ import {
   InsertLike,
   InsertFollow,
   InsertNotification,
+  InsertChatMessage,
   CollectibleWithUser,
   TradeWithDetails,
   PostWithDetails,
-  NotificationWithActor
+  NotificationWithActor,
+  ChatMessageWithSender
 } from '@shared/schema';
-import { eq, and, or, desc, asc, sql, inArray, ne } from 'drizzle-orm';
+import { eq, and, or, desc, asc, sql, inArray, ne, count } from 'drizzle-orm';
 import connectPg from "connect-pg-simple";
 import session from "express-session";
 import { alias } from 'drizzle-orm/pg-core';

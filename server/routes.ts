@@ -2,7 +2,14 @@ import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { z } from "zod";
-import { insertUserSchema, insertCollectibleSchema, insertTradeSchema, insertPostSchema, insertCommentSchema } from "@shared/schema";
+import { 
+  insertUserSchema, 
+  insertCollectibleSchema, 
+  insertTradeSchema, 
+  insertPostSchema, 
+  insertCommentSchema, 
+  insertChatMessageSchema 
+} from "@shared/schema";
 import { setupAuth, isAuthenticated } from "./auth";
 import { registerNotificationRoutes, createTradeRequestNotification, createTradeStatusNotification, createFollowNotification, createLikeNotification, createCommentNotification } from "./notifications";
 
@@ -412,9 +419,182 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get the full trade with details
       const tradeWithDetails = await storage.getTradeWithDetails(updatedTrade.id);
       
+      // If the trade was accepted, automatically create a pinned message with trade details
+      if (result.data.status === "accepted" && tradeWithDetails) {
+        try {
+          const proposerCollectible = tradeWithDetails.proposerCollectible;
+          const receiverCollectible = tradeWithDetails.receiverCollectible;
+          
+          // Create a pinned message with trade details
+          const tradeDetailsMessage = `Trade Accepted!\n\n${tradeWithDetails.proposer.displayName} is trading: ${proposerCollectible.name} (${proposerCollectible.series}, ${proposerCollectible.variant})\n\nFor ${tradeWithDetails.receiver.displayName}'s: ${receiverCollectible.name} (${receiverCollectible.series}, ${receiverCollectible.variant})\n\nPlease discuss shipping details and next steps here.`;
+          
+          await storage.createChatMessage({
+            tradeId: tradeId,
+            senderId: user.id, // Receiver creates the initial message
+            message: tradeDetailsMessage,
+            isPinned: true
+          });
+        } catch (chatError) {
+          console.error("Error creating trade chat:", chatError);
+          // We don't want to fail the trade update if chat creation fails
+        }
+      }
+      
       res.json(tradeWithDetails);
     } catch (error) {
       console.error("Error updating trade status:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+  
+  // Chat message routes
+  app.get("/api/trades/:id/messages", isAuthenticated, async (req, res) => {
+    try {
+      const tradeId = parseInt(req.params.id);
+      if (isNaN(tradeId)) {
+        return res.status(400).json({ message: "Invalid trade ID" });
+      }
+      
+      const user = req.user as any;
+      const trade = await storage.getTrade(tradeId);
+      
+      if (!trade) {
+        return res.status(404).json({ message: "Trade not found" });
+      }
+      
+      // Check if the user is involved in the trade
+      if (trade.proposerId !== user.id && trade.receiverId !== user.id) {
+        return res.status(403).json({ message: "You can only view messages for trades you're involved in" });
+      }
+      
+      // Get all messages for this trade
+      const messages = await storage.getTradeMessages(tradeId);
+      res.json(messages);
+    } catch (error) {
+      console.error("Error getting trade messages:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+  
+  app.post("/api/trades/:id/messages", isAuthenticated, async (req, res) => {
+    try {
+      const tradeId = parseInt(req.params.id);
+      if (isNaN(tradeId)) {
+        return res.status(400).json({ message: "Invalid trade ID" });
+      }
+      
+      const user = req.user as any;
+      const trade = await storage.getTrade(tradeId);
+      
+      if (!trade) {
+        return res.status(404).json({ message: "Trade not found" });
+      }
+      
+      // Check if the user is involved in the trade
+      if (trade.proposerId !== user.id && trade.receiverId !== user.id) {
+        return res.status(403).json({ message: "You can only send messages for trades you're involved in" });
+      }
+      
+      // Check if trade is accepted (chat is only available for accepted trades)
+      if (trade.status !== "accepted" && trade.status !== "completed") {
+        return res.status(400).json({ message: "Chat is only available for accepted or completed trades" });
+      }
+      
+      // Validate and create message
+      const messageData = {
+        tradeId: tradeId,
+        senderId: user.id,
+        message: req.body.message,
+        isPinned: false
+      };
+      
+      const result = insertChatMessageSchema.safeParse(messageData);
+      if (!result.success) {
+        return res.status(400).json({ message: "Invalid message data", errors: result.error.format() });
+      }
+      
+      const chatMessage = await storage.createChatMessage(result.data);
+      
+      // Get the sender details to return a complete message
+      const sender = await storage.getUser(user.id);
+      
+      res.status(201).json({
+        ...chatMessage,
+        sender: {
+          id: sender.id,
+          username: sender.username,
+          displayName: sender.displayName,
+          profileImage: sender.profileImage
+        }
+      });
+    } catch (error) {
+      console.error("Error creating chat message:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+  
+  app.patch("/api/trades/:tradeId/messages/:messageId/pin", isAuthenticated, async (req, res) => {
+    try {
+      const tradeId = parseInt(req.params.tradeId);
+      const messageId = parseInt(req.params.messageId);
+      
+      if (isNaN(tradeId) || isNaN(messageId)) {
+        return res.status(400).json({ message: "Invalid trade or message ID" });
+      }
+      
+      const user = req.user as any;
+      const trade = await storage.getTrade(tradeId);
+      
+      if (!trade) {
+        return res.status(404).json({ message: "Trade not found" });
+      }
+      
+      // Check if the user is involved in the trade
+      if (trade.proposerId !== user.id && trade.receiverId !== user.id) {
+        return res.status(403).json({ message: "You can only pin messages for trades you're involved in" });
+      }
+      
+      const success = await storage.pinChatMessage(messageId);
+      if (!success) {
+        return res.status(404).json({ message: "Message not found" });
+      }
+      
+      res.json({ message: "Message pinned successfully" });
+    } catch (error) {
+      console.error("Error pinning message:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+  
+  app.patch("/api/trades/:tradeId/messages/:messageId/unpin", isAuthenticated, async (req, res) => {
+    try {
+      const tradeId = parseInt(req.params.tradeId);
+      const messageId = parseInt(req.params.messageId);
+      
+      if (isNaN(tradeId) || isNaN(messageId)) {
+        return res.status(400).json({ message: "Invalid trade or message ID" });
+      }
+      
+      const user = req.user as any;
+      const trade = await storage.getTrade(tradeId);
+      
+      if (!trade) {
+        return res.status(404).json({ message: "Trade not found" });
+      }
+      
+      // Check if the user is involved in the trade
+      if (trade.proposerId !== user.id && trade.receiverId !== user.id) {
+        return res.status(403).json({ message: "You can only unpin messages for trades you're involved in" });
+      }
+      
+      const success = await storage.unpinChatMessage(messageId);
+      if (!success) {
+        return res.status(404).json({ message: "Message not found" });
+      }
+      
+      res.json({ message: "Message unpinned successfully" });
+    } catch (error) {
+      console.error("Error unpinning message:", error);
       res.status(500).json({ message: "Server error" });
     }
   });
