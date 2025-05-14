@@ -27,13 +27,13 @@ export default function TradeModal({ open, onOpenChange, offeredCollectible }: T
   const [selectedCollectible, setSelectedCollectible] = useState<string>("");
   
   // Fetch all collectibles available for trade
-  const { data: tradeCollectibles = [], isLoading: isLoadingCollectibles } = useQuery({
+  const { data: tradeCollectibles = [], isLoading: isLoadingCollectibles } = useQuery<any[]>({
     queryKey: ["/api/collectibles?forTrade=true"],
     enabled: open,
   });
   
   // Filter out the current user's collectibles and the offered collectible
-  const otherUserCollectibles = (tradeCollectibles as any[]).filter(
+  const otherUserCollectibles = tradeCollectibles.filter(
     (collectible) => collectible.userId !== user?.id && (!offeredCollectible || collectible.id !== offeredCollectible.id)
   );
   
@@ -49,7 +49,12 @@ export default function TradeModal({ open, onOpenChange, offeredCollectible }: T
   
   // Mutations for creating a trade
   const { mutate: createTrade, isPending } = useMutation({
-    mutationFn: async (tradeData: any) => {
+    mutationFn: async (tradeData: {
+      proposerCollectibleId: number;
+      receiverId: number;
+      receiverCollectibleId: number;
+      message: string;
+    }) => {
       const response = await apiRequest("POST", "/api/trades", tradeData);
       return response.json();
     },

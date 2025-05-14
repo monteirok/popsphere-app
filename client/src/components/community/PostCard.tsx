@@ -194,7 +194,7 @@ export default function PostCard({ post }: PostCardProps) {
           <div className="p-2 bg-gray-50 rounded-custom">
             {isLoadingComments ? (
               <p className="text-center text-xs py-2">Loading comments...</p>
-            ) : comments.length > 0 ? (
+            ) : (comments as any[]).length > 0 ? (
               <div className="space-y-2">
                 {(comments as any[]).map((comment) => (
                   <div key={comment.id} className="flex items-start space-x-2">
@@ -253,8 +253,8 @@ export default function PostCard({ post }: PostCardProps) {
           <div className="max-h-[300px] overflow-y-auto space-y-3">
             {isLoadingComments ? (
               <p className="text-center py-2">Loading comments...</p>
-            ) : comments.length > 0 ? (
-              comments.map((comment: any) => (
+            ) : (comments as any[]).length > 0 ? (
+              (comments as any[]).map((comment) => (
                 <div key={comment.id} className="flex items-start space-x-2">
                   <AvatarWithStatus
                     src={comment.user.profileImage || ""}
