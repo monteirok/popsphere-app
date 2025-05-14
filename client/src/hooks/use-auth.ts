@@ -1,48 +1,32 @@
-import { createContext, ReactNode, useContext } from "react";
-import {
-  useQuery,
-  useMutation,
-} from "@tanstack/react-query";
-import { User } from "../../shared/schema";
-import { apiRequest, queryClient } from "./lib/queryClient";
-import { useToast } from "./hooks/use-toast";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useToast } from "../hooks/use-toast";
+import { User } from "../../../shared/schema";
 
-type AuthContextType = {
-  user: User | null;
-  isLoading: boolean;
-  error: Error | null;
-  login: (credentials: LoginData) => void;
-  isLoginPending: boolean;
-  register: (credentials: RegisterData) => void;
-  isRegisterPending: boolean;
-  logout: () => void;
-};
-
-type LoginData = {
+export interface LoginCredentials {
   username: string;
   password: string;
-};
+}
 
-type RegisterData = {
+export interface RegisterData {
   username: string;
   password: string;
   email: string;
   displayName: string;
   bio?: string;
   profileImage?: string;
-};
+}
 
-export const AuthContext = createContext<AuthContextType | null>(null);
-
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const { toast } = useToast();
+export function useAuth() {
   const [, setLocation] = useLocation();
-  
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
   const {
     data: user,
-    error,
     isLoading,
+    error,
   } = useQuery<User | null>({
     queryKey: ["/api/user"],
     queryFn: async () => {
@@ -64,11 +48,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   });
 
   const loginMutation = useMutation({
-    mutationFn: async (credentials: LoginData) => {
-      const res = await apiRequest("POST", "/api/login", credentials);
-      return await res.json();
+    mutationFn: async (credentials: LoginCredentials) => {
+      const response = await fetch("/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(credentials),
+      });
+
+      if (!response.ok) {
+        throw new Error("Login failed");
+      }
+
+      return await response.json();
     },
-    onSuccess: (data: User) => {
+    onSuccess: (data) => {
       queryClient.setQueryData(["/api/user"], data);
       setLocation("/");
       toast({
@@ -76,7 +71,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         description: `Welcome back, ${data.displayName}!`,
       });
     },
-    onError: (error: Error) => {
+    onError: () => {
       toast({
         title: "Login failed",
         description: "Incorrect username or password",
@@ -86,11 +81,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   });
 
   const registerMutation = useMutation({
-    mutationFn: async (credentials: RegisterData) => {
-      const res = await apiRequest("POST", "/api/register", credentials);
-      return await res.json();
+    mutationFn: async (data: RegisterData) => {
+      const response = await fetch("/api/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        throw new Error("Registration failed");
+      }
+
+      return await response.json();
     },
-    onSuccess: (data: User) => {
+    onSuccess: (data) => {
       queryClient.setQueryData(["/api/user"], data);
       setLocation("/");
       toast({
@@ -98,7 +104,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         description: `Welcome to PopCollect, ${data.displayName}!`,
       });
     },
-    onError: (error: Error) => {
+    onError: () => {
       toast({
         title: "Registration failed",
         description: "Could not create your account. Please try again.",
@@ -106,10 +112,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
     },
   });
-  
+
   const logoutMutation = useMutation({
     mutationFn: async () => {
-      await apiRequest("POST", "/api/logout");
+      const response = await fetch("/api/logout", {
+        method: "POST",
+      });
+
+      if (!response.ok) {
+        throw new Error("Logout failed");
+      }
     },
     onSuccess: () => {
       queryClient.setQueryData(["/api/user"], null);
@@ -120,7 +132,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         description: "You have been successfully logged out.",
       });
     },
-    onError: (error: Error) => {
+    onError: () => {
       toast({
         title: "Logout failed",
         description: "There was an error logging out. Please try again.",
@@ -129,28 +141,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
   });
 
-  return (
-    <AuthContext.Provider
-      value={{
-        user: user ?? null,
-        isLoading,
-        error,
-        login: loginMutation.mutate,
-        isLoginPending: loginMutation.isPending,
-        register: registerMutation.mutate,
-        isRegisterPending: registerMutation.isPending,
-        logout: logoutMutation.mutate,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
-  );
-}
-
-export function useAuth() {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
+  return {
+    user,
+    isLoading,
+    error,
+    login: loginMutation.mutate,
+    isLoginPending: loginMutation.isPending,
+    register: registerMutation.mutate,
+    isRegisterPending: registerMutation.isPending,
+    logout: logoutMutation.mutate,
+  };
 }

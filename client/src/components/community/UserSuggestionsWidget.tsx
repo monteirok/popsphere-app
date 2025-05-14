@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import UserSuggestionCard from "./UserSuggestionCard";
-import { useAuth } from "@/auth-provider";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function UserSuggestionsWidget() {
   const { user } = useAuth();

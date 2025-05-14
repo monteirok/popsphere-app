@@ -361,13 +361,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create the trade
       const trade = await storage.createTrade(result.data);
       
-      // Create a notification for the trade request
-      await createTradeRequestNotification(
-        trade.id,
-        trade.proposerId,
-        trade.receiverId
-      );
-      
       // Get the full trade with details
       const tradeWithDetails = await storage.getTradeWithDetails(trade.id);
       
@@ -415,14 +408,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!updatedTrade) {
         return res.status(500).json({ message: "Failed to update trade status" });
       }
-      
-      // Create a notification for the trade status update
-      await createTradeStatusNotification(
-        updatedTrade.id,
-        result.data.status,
-        updatedTrade.proposerId,
-        updatedTrade.receiverId
-      );
       
       // Get the full trade with details
       const tradeWithDetails = await storage.getTradeWithDetails(updatedTrade.id);

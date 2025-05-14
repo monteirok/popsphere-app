@@ -2,14 +2,15 @@ import { createContext, ReactNode, useContext } from "react";
 import {
   useQuery,
   useMutation,
+  UseMutationResult,
 } from "@tanstack/react-query";
-import { User } from "../../../shared/schema";
+import { User as SelectUser } from "@shared/schema";
 import { apiRequest, queryClient } from "../lib/queryClient";
-import { useToast } from "../hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 
 type AuthContextType = {
-  user: User | null;
+  user: SelectUser | null;
   isLoading: boolean;
   error: Error | null;
   login: (credentials: LoginData) => void;
@@ -43,7 +44,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     data: user,
     error,
     isLoading,
-  } = useQuery<User | null>({
+  } = useQuery<SelectUser | null>({
     queryKey: ["/api/user"],
     queryFn: async () => {
       try {
@@ -68,7 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const res = await apiRequest("POST", "/api/login", credentials);
       return await res.json();
     },
-    onSuccess: (data: User) => {
+    onSuccess: (data: SelectUser) => {
       queryClient.setQueryData(["/api/user"], data);
       setLocation("/");
       toast({
@@ -90,7 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const res = await apiRequest("POST", "/api/register", credentials);
       return await res.json();
     },
-    onSuccess: (data: User) => {
+    onSuccess: (data: SelectUser) => {
       queryClient.setQueryData(["/api/user"], data);
       setLocation("/");
       toast({

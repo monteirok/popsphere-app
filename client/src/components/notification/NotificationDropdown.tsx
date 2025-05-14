@@ -1,19 +1,19 @@
 import React, { useEffect } from 'react';
 import { Bell } from 'lucide-react';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { useToast } from '../../hooks/use-toast';
-import { useAuth } from '../../hooks/use-auth';
-import { Badge } from '../ui/badge';
+import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/use-auth';
+import { Badge } from '@/components/ui/badge';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from '../ui/popover';
-import { Button } from '../ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
-import { getInitials, formatDate } from '../../lib/utils';
-import { queryClient, apiRequest } from '../../lib/queryClient';
-import { cn } from '../../lib/utils';
+} from '@/components/ui/popover';
+import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { getInitials, formatDate } from '@/lib/utils';
+import { queryClient, apiRequest } from '@/lib/queryClient';
+import { cn } from '@/lib/utils';
 
 export type Notification = {
   id: number;
