@@ -487,6 +487,21 @@ export default function Profile() {
           </div>
         </TabsContent>
       </Tabs>
+      
+      {/* Followers/Following Modal */}
+      {profileUser && (
+        <FollowersModal
+          open={isFollowersModalOpen}
+          onOpenChange={setIsFollowersModalOpen}
+          followers={followers || []}
+          following={following || []}
+          userId={profileUser.id}
+          username={profileUser.username}
+          isOwnProfile={isOwnProfile}
+          refetchFollowers={refetchFollowers}
+          refetchFollowing={refetchFollowing}
+        />
+      )}
     </div>
   );
 }
