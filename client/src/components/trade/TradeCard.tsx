@@ -221,7 +221,7 @@ export default function TradeCard({ trade, isUserProposer }: TradeCardProps) {
       
       {trade.status === "completed" && (
         <div className="mt-3">
-          <div className="p-2 bg-amber-50 border border-amber-200 rounded-custom text-center text-xs text-amber-700">
+          <div className="p-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-custom text-center text-xs text-amber-700 dark:text-amber-400">
             <div className="flex items-center justify-center">
               <div className="w-2 h-2 bg-golden-yellow rounded-full mr-2"></div>
               Trade successfully completed!
@@ -235,7 +235,7 @@ export default function TradeCard({ trade, isUserProposer }: TradeCardProps) {
               }}
               variant="outline"
               size="sm"
-              className="bg-white hover:bg-gray-100 border border-gray-200 rounded-full px-3 py-1.5 text-xs font-medium transition flex items-center gap-1"
+              className="bg-white hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 text-dark-grey dark:text-gray-200 rounded-full px-3 py-1.5 text-xs font-medium transition flex items-center gap-1"
             >
               <MessageCircle className="h-3 w-3" /> View Chat History
             </Button>
