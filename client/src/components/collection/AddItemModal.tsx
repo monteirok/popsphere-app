@@ -197,10 +197,26 @@ export default function AddItemModal({ open, onOpenChange, onSuccess }: AddItemM
                   name="image"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Image URL</FormLabel>
-                      <FormControl>
-                        <Input placeholder="https://example.com/image.jpg" className="dark:bg-gray-700 dark:border-gray-600" {...field} />
-                      </FormControl>
+                      <FormLabel>Image</FormLabel>
+                      <div className="space-y-2">
+                        {field.value && (
+                          <div className="w-full h-40 rounded-lg bg-cover bg-center mb-2 overflow-hidden border dark:border-gray-700" 
+                              style={{ backgroundImage: `url(${field.value})` }}>
+                          </div>
+                        )}
+                        <div className="text-sm text-gray-500 dark:text-gray-400 truncate">
+                          {field.value ? field.value.split('/').pop() : 'No image selected'}
+                        </div>
+                        <FormControl>
+                          <FileUpload
+                            onFileSelected={(path) => field.onChange(path)}
+                            endpoint={`/api/collectibles/image/${user?.id ?? ''}`}
+                            buttonText="Upload Collectible Image"
+                            disabled={isSubmitting}
+                            accept="image/png,image/jpeg,image/jpg"
+                          />
+                        </FormControl>
+                      </div>
                       <FormMessage />
                     </FormItem>
                   )}
