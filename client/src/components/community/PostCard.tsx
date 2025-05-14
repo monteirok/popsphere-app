@@ -42,7 +42,7 @@ export default function PostCard({ post }: PostCardProps) {
   const [likesCount, setLikesCount] = useState(post.likesCount);
   
   // Get post comments
-  const { data: comments = [], isLoading: isLoadingComments } = useQuery({
+  const { data: comments = [], isLoading: isLoadingComments } = useQuery<any[]>({
     queryKey: [`/api/posts/${post.id}/comments`],
     enabled: showComments || showCommentsDialog,
   });
@@ -166,7 +166,7 @@ export default function PostCard({ post }: PostCardProps) {
               src={image}
               alt={`Post image ${index + 1}`}
               className="w-full h-full object-cover rounded-custom"
-              style={{ maxHeight: post.images.length === 1 ? '300px' : '150px' }}
+              style={{ maxHeight: post.images && post.images.length === 1 ? '300px' : '150px' }}
             />
           ))}
         </div>
@@ -196,7 +196,7 @@ export default function PostCard({ post }: PostCardProps) {
               <p className="text-center text-xs py-2">Loading comments...</p>
             ) : comments.length > 0 ? (
               <div className="space-y-2">
-                {comments.map((comment: any) => (
+                {(comments as any[]).map((comment) => (
                   <div key={comment.id} className="flex items-start space-x-2">
                     <AvatarWithStatus
                       src={comment.user.profileImage || ""}
