@@ -11,7 +11,7 @@ import { ThemeProvider } from "./components/theme-provider";
 createRoot(document.getElementById("root")!).render(
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
-      <ThemeProvider defaultTheme="light" storageKey="popsphere-theme">
+      <ThemeProvider defaultTheme="dark" storageKey="popsphere-theme">
         <TooltipProvider>
           <Toaster />
           <App />

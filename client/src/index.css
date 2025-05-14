@@ -130,6 +130,14 @@
   background-color: hsl(var(--primary));
 }
 
+.text-brand-dark {
+  color: #ff63ac; /* Slightly adjusted pink for dark mode */
+}
+
+.bg-brand-dark {
+  background-color: #ff63ac; /* Slightly adjusted pink for dark mode */
+}
+
 .text-soft-blue {
   color: hsl(var(--secondary));
 }
