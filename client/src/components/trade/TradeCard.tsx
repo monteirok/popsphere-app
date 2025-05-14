@@ -171,7 +171,7 @@ export default function TradeCard({ trade, isUserProposer }: TradeCardProps) {
             disabled={isPending}
             variant="outline"
             size="sm"
-            className="flex-1 bg-gray-200 hover:bg-gray-300 text-dark-grey rounded-full px-3 py-1.5 text-xs font-medium transition"
+            className="flex-1 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-dark-grey dark:text-gray-200 rounded-full px-3 py-1.5 text-xs font-medium transition"
           >
             Cancel Request
           </Button>
@@ -180,7 +180,7 @@ export default function TradeCard({ trade, isUserProposer }: TradeCardProps) {
       
       {trade.status === "accepted" && (
         <div className="mt-3">
-          <div className="p-2 bg-green-50 border border-green-200 rounded-custom text-center text-xs text-green-700">
+          <div className="p-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-custom text-center text-xs text-green-700 dark:text-green-400">
             <div className="flex items-center justify-center">
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse mr-2"></div>
               Trade accepted! Coordinate with the other collector to complete the exchange.
@@ -202,7 +202,7 @@ export default function TradeCard({ trade, isUserProposer }: TradeCardProps) {
               }}
               variant="outline"
               size="sm"
-              className="bg-white hover:bg-gray-100 border border-gray-200 rounded-full px-3 py-1.5 text-xs font-medium transition flex items-center gap-1"
+              className="bg-white hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 text-dark-grey dark:text-gray-200 rounded-full px-3 py-1.5 text-xs font-medium transition flex items-center gap-1"
             >
               <MessageCircle className="h-3 w-3" /> Chat
             </Button>
@@ -211,7 +211,7 @@ export default function TradeCard({ trade, isUserProposer }: TradeCardProps) {
       )}
       
       {trade.status === "rejected" && (
-        <div className="mt-3 p-2 bg-red-50 border border-red-200 rounded-custom text-center text-xs text-red-700">
+        <div className="mt-3 p-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-custom text-center text-xs text-red-700 dark:text-red-400">
           <div className="flex items-center justify-center">
             <div className="w-2 h-2 bg-red-500 rounded-full mr-2"></div>
             Trade declined. Better luck next time!
