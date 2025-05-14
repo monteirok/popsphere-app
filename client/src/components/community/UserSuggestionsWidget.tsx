@@ -8,6 +8,7 @@ export default function UserSuggestionsWidget() {
   const { data: recommendedUsers = [], isLoading } = useQuery({
     queryKey: ["/api/users/recommended"],
     enabled: !!user,
+    refetchInterval: 60000, // Auto refresh every minute - less frequent for user suggestions
   });
   
   // Limit to 3 recommendations

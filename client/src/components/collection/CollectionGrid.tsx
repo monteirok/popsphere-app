@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import CollectionItemCard from "./CollectionItemCard";
 import { Button } from "@/components/ui/button";
-import { PlusIcon } from "lucide-react";
+import { PlusIcon, RefreshCw } from "lucide-react";
 import AddItemModal from "./AddItemModal";
 import { Collectible } from "@shared/schema";
 
@@ -15,11 +15,31 @@ interface CollectionGridProps {
 export default function CollectionGrid({ userId, series = "all", sort = "newest" }: CollectionGridProps) {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [page, setPage] = useState(1);
+  const [refreshInterval, setRefreshInterval] = useState<number>(10000); // 10 seconds by default
+  const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   const ITEMS_PER_PAGE = 8;
 
-  const { data: collectibles = [], isLoading, isError } = useQuery({
+  const { data: collectibles = [], isLoading, isError, refetch } = useQuery<Collectible[]>({
     queryKey: [`/api/collectibles?userId=${userId}`],
+    refetchInterval: refreshInterval,
   });
+  
+  // Function to manually refresh collectibles
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await refetch();
+    setTimeout(() => setIsRefreshing(false), 1000); // Show refresh animation for at least 1 second
+  };
+  
+  // Auto-refresh when the component mounts
+  useEffect(() => {
+    handleRefresh();
+    
+    // Stop auto-refresh when component unmounts
+    return () => {
+      setRefreshInterval(0);
+    };
+  }, []);
 
   // Filter by series if needed
   const filteredCollectibles = series === "all" 
@@ -71,6 +91,17 @@ export default function CollectionGrid({ userId, series = "all", sort = "newest"
 
   return (
     <div className="bg-white rounded-custom p-4 shadow-soft">
+      <div className="flex justify-end mb-3">
+        <Button
+          variant="outline"
+          size="icon"
+          className={`rounded-full h-8 w-8 ${isRefreshing ? 'animate-spin' : ''}`}
+          onClick={handleRefresh}
+          disabled={isRefreshing}
+        >
+          <RefreshCw className="h-4 w-4 text-pop-pink" />
+        </Button>
+      </div>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
         {paginatedCollectibles.map((collectible: Collectible) => (
           <CollectionItemCard 
@@ -105,7 +136,8 @@ export default function CollectionGrid({ userId, series = "all", sort = "newest"
       
       <AddItemModal 
         open={isAddModalOpen} 
-        onOpenChange={setIsAddModalOpen} 
+        onOpenChange={setIsAddModalOpen}
+        onSuccess={handleRefresh}
       />
     </div>
   );

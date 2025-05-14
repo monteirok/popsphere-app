@@ -46,6 +46,7 @@ export default function Collection() {
 function ActiveTradesWidget({ userId }: { userId: number }) {
   const { data: trades = [], isLoading } = useQuery({
     queryKey: ["/api/trades"],
+    refetchInterval: 10000, // Auto refresh every 10 seconds
   });
   
   // Filter to only pending trades and limit to 2

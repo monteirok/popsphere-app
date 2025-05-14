@@ -4,6 +4,7 @@ import PostCard from "./PostCard";
 export default function CommunityFeedWidget() {
   const { data: posts = [], isLoading } = useQuery({
     queryKey: ["/api/posts"],
+    refetchInterval: 15000, // Auto refresh every 15 seconds
   });
   
   // Limit to 2 posts for the widget
