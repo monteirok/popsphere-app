@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { getInitials } from "@/lib/utils";
+import FollowersModal from "@/components/profile/FollowersModal";
 import { 
   Edit, 
   Grid, 
@@ -31,7 +32,6 @@ import CollectionItemCard from "@/components/collection/CollectionItemCard";
 import PostCard from "@/components/community/PostCard";
 import UserSuggestionCard from "@/components/community/UserSuggestionCard";
 import TradeCard from "@/components/trade/TradeCard";
-import FollowersModal from "@/components/profile/FollowersModal";
 
 export default function Profile() {
   const { username } = useParams<{ username?: string }>();
@@ -78,7 +78,11 @@ export default function Profile() {
   });
   
   // Fetch user's followers
-  const { data: followers = [], isLoading: isLoadingFollowers } = useQuery({
+  const { 
+    data: followers = [], 
+    isLoading: isLoadingFollowers,
+    refetch: refetchFollowers
+  } = useQuery({
     queryKey: [username 
       ? `/api/users/${username}/followers` 
       : `/api/users/${profileUser?.id}/followers`
@@ -87,7 +91,11 @@ export default function Profile() {
   });
   
   // Fetch user's following
-  const { data: following = [], isLoading: isLoadingFollowing } = useQuery({
+  const { 
+    data: following = [], 
+    isLoading: isLoadingFollowing,
+    refetch: refetchFollowing
+  } = useQuery({
     queryKey: [username 
       ? `/api/users/${username}/following` 
       : `/api/users/${profileUser?.id}/following`
