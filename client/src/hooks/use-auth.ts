@@ -78,11 +78,11 @@ export function useAuth() {
   // Register mutation
   const { mutate: register, isPending: isRegisterPending } = useMutation({
     mutationFn: async (data: RegisterData) => {
-      const response = await apiRequest("POST", "/api/auth/register", data);
+      const response = await apiRequest("POST", "/api/register", data);
       return response.json();
     },
     onSuccess: (data) => {
-      queryClient.setQueryData(["/api/auth/session"], data);
+      queryClient.setQueryData(["/api/user"], data);
       setLocation("/");
       toast({
         title: "Registration successful!",
@@ -101,12 +101,12 @@ export function useAuth() {
   // Logout mutation
   const { mutate: logout } = useMutation({
     mutationFn: async () => {
-      const response = await apiRequest("POST", "/api/auth/logout", {});
+      const response = await apiRequest("POST", "/api/logout", {});
       return response.json();
     },
     onSuccess: () => {
-      queryClient.setQueryData(["/api/auth/session"], null);
-      queryClient.invalidateQueries({ queryKey: ["/api/auth/session"] });
+      queryClient.setQueryData(["/api/user"], null);
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
       setLocation("/login");
       toast({
         title: "Logged out",
