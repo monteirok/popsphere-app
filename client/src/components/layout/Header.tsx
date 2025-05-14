@@ -9,6 +9,7 @@ import { useAuth } from "../../hooks/use-auth";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "../../lib/queryClient";
 import NotificationDropdown from "../notification/NotificationDropdown";
+import { ThemeToggle } from "../ui/theme-toggle";
 
 // Define the user interface for search results
 interface SearchUser {
@@ -81,13 +82,13 @@ export default function Header() {
   };
   
   return (
-    <header className="bg-white shadow-sm sticky top-0 z-50">
+    <header className="bg-background shadow-sm sticky top-0 z-50 border-b dark:border-gray-800">
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
         <div className="flex items-center">
           <Link href="/">
-            <h1 className="text-2xl font-bold text-pop-pink font-nunito mr-2 cursor-pointer">PopCollect</h1>
+            <h1 className="text-2xl font-bold text-pop-pink font-nunito mr-2 cursor-pointer">PopSphere</h1>
           </Link>
-          <span className="bg-pop-pink text-white text-xs px-2 py-1 rounded-full">BETA</span>
+          <span className="bg-pop-pink text-white text-xs px-2 py-1 rounded-full">ALPHA</span>
         </div>
         
         <div className="hidden md:flex flex-grow max-w-md mx-4" ref={searchRef}>
@@ -95,7 +96,7 @@ export default function Header() {
             <Input 
               type="text" 
               placeholder="Search users by name or username..." 
-              className="w-full bg-gray-100 rounded-full py-2 px-4 pl-10 focus:outline-none focus:ring-2 focus:ring-pop-pink text-sm"
+              className="w-full bg-gray-100 dark:bg-gray-800 rounded-full py-2 px-4 pl-10 focus:outline-none focus:ring-2 focus:ring-pop-pink text-sm"
               value={searchQuery}
               onChange={handleSearchChange}
               onClick={handleSearchClick}
@@ -112,8 +113,8 @@ export default function Header() {
             
             {/* Search Results Dropdown */}
             {isSearchFocused && searchQuery.length >= 2 && (
-              <div className="absolute top-12 left-0 right-0 bg-white rounded-lg shadow-lg border z-50 max-h-80 overflow-y-auto">
-                <div className="p-3 border-b">
+              <div className="absolute top-12 left-0 right-0 bg-background rounded-lg shadow-lg border dark:border-gray-700 z-50 max-h-80 overflow-y-auto">
+                <div className="p-3 border-b dark:border-gray-700">
                   <h3 className="text-sm font-semibold">
                     {isLoading ? 'Searching...' : `Search results for "${searchQuery}"`}
                   </h3>
@@ -133,7 +134,7 @@ export default function Header() {
                     {searchResults.map((result) => (
                       <li 
                         key={result.id} 
-                        className="p-3 hover:bg-gray-50 cursor-pointer"
+                        className="p-3 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer"
                         onClick={() => handleUserClick(result.id, result.username)}
                       >
                         <div className="flex items-center">
@@ -143,13 +144,13 @@ export default function Header() {
                           </Avatar>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between">
-                              <p className="text-sm font-medium text-gray-900 truncate">
+                              <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
                                 {result.displayName}
                               </p>
-                              <span className="text-xs text-gray-500">@{result.username}</span>
+                              <span className="text-xs text-gray-500 dark:text-gray-400">@{result.username}</span>
                             </div>
                             {result.bio && (
-                              <p className="text-xs text-gray-500 truncate">{result.bio}</p>
+                              <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{result.bio}</p>
                             )}
                           </div>
                         </div>
@@ -168,11 +169,12 @@ export default function Header() {
           </Button>
           <NotificationDropdown />
           <MessageSquare className="h-6 w-6 text-dark-grey cursor-pointer" />
+          <ThemeToggle />
           
           {user && (
             <Link href="/profile">
               <Avatar className="h-8 w-8 border-2 border-pop-pink cursor-pointer">
-                <AvatarImage src={user.profileImage} alt={user.displayName} />
+                <AvatarImage src={user.profileImage ? user.profileImage : undefined} alt={user.displayName} />
                 <AvatarFallback>{getInitials(user.displayName)}</AvatarFallback>
               </Avatar>
             </Link>
@@ -180,7 +182,7 @@ export default function Header() {
         </div>
       </div>
       
-      <nav className="container mx-auto px-4 flex border-t">
+      <nav className="container mx-auto px-4 flex border-t dark:border-gray-800">
         <NavLink href="/" active={location === '/'}>
           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <rect x="3" y="3" width="7" height="7"></rect>
@@ -225,7 +227,7 @@ interface NavLinkProps {
 function NavLink({ href, active, children }: NavLinkProps) {
   return (
     <Link href={href}>
-      <div className={`px-4 py-3 font-medium flex items-center cursor-pointer ${active ? 'tab-active text-pop-pink' : 'text-gray-600 hover:text-pop-pink'}`}>
+      <div className={`px-4 py-3 font-medium flex items-center cursor-pointer ${active ? 'tab-active text-pop-pink' : 'text-gray-600 dark:text-gray-300 hover:text-pop-pink'}`}>
         {children}
       </div>
     </Link>
