@@ -1,30 +1,52 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
 import TradeCard from "@/components/trade/TradeCard";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus } from "lucide-react";
+import { Plus, RefreshCw } from "lucide-react";
 import TradeModal from "@/components/trade/TradeModal";
+import { TradeWithDetails } from "@shared/schema";
 
 export default function Trades() {
   const { user } = useAuth();
   const [isTradeModalOpen, setIsTradeModalOpen] = useState(false);
   
-  const { data: trades = [], isLoading } = useQuery({
+  const [refreshInterval, setRefreshInterval] = useState<number>(15000); // 15 seconds by default
+  const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
+  
+  const { data: trades = [], isLoading, refetch } = useQuery<TradeWithDetails[]>({
     queryKey: ["/api/trades"],
+    refetchInterval: refreshInterval,
   });
+  
+  // Function to manually refresh trades
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await refetch();
+    setTimeout(() => setIsRefreshing(false), 1000); // Show refresh animation for at least 1 second
+  };
   
   if (!user) {
     return <div>Please log in to view your trades.</div>;
   }
   
+  // Auto-refresh when the component mounts
+  useEffect(() => {
+    handleRefresh();
+    
+    // Stop auto-refresh when component unmounts
+    return () => {
+      setRefreshInterval(0);
+    };
+  }, []);
+  
   // Separate trades by status
-  const pendingTrades = (trades as any[]).filter(trade => trade.status === "pending");
-  const completedTrades = (trades as any[]).filter(
+  const pendingTrades = trades.filter(trade => trade.status === "pending");
+  const completedTrades = trades.filter(
     trade => trade.status === "accepted" || trade.status === "completed"
   );
-  const rejectedTrades = (trades as any[]).filter(trade => trade.status === "rejected");
+  const rejectedTrades = trades.filter(trade => trade.status === "rejected");
   
   // Separate incoming and outgoing trades
   const incomingTrades = pendingTrades.filter(trade => trade.receiverId === user.id);
@@ -34,7 +56,18 @@ export default function Trades() {
     <div className="max-w-4xl mx-auto">
       <div className="bg-white rounded-custom p-4 shadow-soft mb-6">
         <div className="flex justify-between items-center mb-4">
-          <h1 className="text-2xl font-bold font-nunito">Trade Center</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-bold font-nunito">Trade Center</h1>
+            <Button
+              variant="outline"
+              size="icon"
+              className={`rounded-full h-8 w-8 ${isRefreshing ? 'animate-spin' : ''}`}
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+            >
+              <RefreshCw className="h-4 w-4 text-pop-pink" />
+            </Button>
+          </div>
           <Button 
             className="bg-pop-pink hover:bg-opacity-90 rounded-full"
             onClick={() => setIsTradeModalOpen(true)}
@@ -160,7 +193,13 @@ export default function Trades() {
       {/* Trade Modal */}
       <TradeModal
         open={isTradeModalOpen}
-        onOpenChange={setIsTradeModalOpen}
+        onOpenChange={(open) => {
+          setIsTradeModalOpen(open);
+          // When modal closes, refresh trades list
+          if (!open) {
+            handleRefresh();
+          }
+        }}
       />
     </div>
   );
