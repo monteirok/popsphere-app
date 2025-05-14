@@ -32,34 +32,34 @@ export default function RarityBadge({
     switch (rarity.toLowerCase()) {
       case "common":
         return {
-          icon: <Award className={cn(sizeMap[size], "text-soft-blue")} />,
-          textColor: "text-soft-blue",
+          icon: <Award className={cn(sizeMap[size], "text-soft-blue dark:text-blue-400")} />,
+          textColor: "text-soft-blue dark:text-blue-400",
           label: "Common"
         };
       case "rare":
         return {
-          icon: <Star className={cn(sizeMap[size], "text-golden-yellow")} />,
-          textColor: "text-golden-yellow",
+          icon: <Star className={cn(sizeMap[size], "text-golden-yellow dark:text-yellow-300")} />,
+          textColor: "text-golden-yellow dark:text-yellow-300",
           label: "Rare"
         };
       case "ultra-rare":
       case "ultra rare":
         return {
-          icon: <Crown className={cn(sizeMap[size], "text-purple-500")} />,
-          textColor: "text-purple-500",
+          icon: <Crown className={cn(sizeMap[size], "text-purple-500 dark:text-purple-400")} />,
+          textColor: "text-purple-500 dark:text-purple-400",
           label: "Ultra Rare"
         };
       case "limited":
       case "limited edition":
         return {
-          icon: <Gem className={cn(sizeMap[size], "text-red-500")} />,
-          textColor: "text-red-500",
+          icon: <Gem className={cn(sizeMap[size], "text-red-500 dark:text-red-400")} />,
+          textColor: "text-red-500 dark:text-red-400",
           label: "Limited"
         };
       default:
         return {
-          icon: <Award className={cn(sizeMap[size], "text-gray-400")} />,
-          textColor: "text-gray-400",
+          icon: <Award className={cn(sizeMap[size], "text-gray-400 dark:text-gray-500")} />,
+          textColor: "text-gray-400 dark:text-gray-500",
           label: "Unknown"
         };
     }

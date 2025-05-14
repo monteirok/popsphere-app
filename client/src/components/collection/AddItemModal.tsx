@@ -94,9 +94,9 @@ export default function AddItemModal({ open, onOpenChange, onSuccess }: AddItemM
   
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[550px]">
+      <DialogContent className="sm:max-w-[550px] dark:bg-gray-800 dark:border-gray-700">
         <DialogHeader>
-          <DialogTitle className="text-xl text-pop-pink">Add New Collectible</DialogTitle>
+          <DialogTitle className="text-xl text-pop-pink dark:text-brand-dark">Add New Collectible</DialogTitle>
         </DialogHeader>
         
         <Form {...form}>
@@ -109,7 +109,7 @@ export default function AddItemModal({ open, onOpenChange, onSuccess }: AddItemM
                   <FormItem>
                     <FormLabel>Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="Dimoo Candy Series" {...field} />
+                      <Input placeholder="Dimoo Candy Series" className="dark:bg-gray-700 dark:border-gray-600" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -123,7 +123,7 @@ export default function AddItemModal({ open, onOpenChange, onSuccess }: AddItemM
                   <FormItem>
                     <FormLabel>Variant</FormLabel>
                     <FormControl>
-                      <Input placeholder="Strawberry Dream" {...field} />
+                      <Input placeholder="Strawberry Dream" className="dark:bg-gray-700 dark:border-gray-600" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -141,11 +141,11 @@ export default function AddItemModal({ open, onOpenChange, onSuccess }: AddItemM
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className="dark:bg-gray-700 dark:border-gray-600">
                           <SelectValue placeholder="Select a series" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
+                      <SelectContent className="dark:bg-gray-800 dark:border-gray-700">
                         {seriesOptions.map((series) => (
                           <SelectItem key={series} value={series}>
                             {series}
@@ -169,11 +169,11 @@ export default function AddItemModal({ open, onOpenChange, onSuccess }: AddItemM
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className="dark:bg-gray-700 dark:border-gray-600">
                           <SelectValue placeholder="Select rarity" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
+                      <SelectContent className="dark:bg-gray-800 dark:border-gray-700">
                         {rarityOptions.map((option) => (
                           <SelectItem key={option.value} value={option.value}>
                             {option.label}
@@ -194,7 +194,7 @@ export default function AddItemModal({ open, onOpenChange, onSuccess }: AddItemM
                     <FormItem>
                       <FormLabel>Image URL</FormLabel>
                       <FormControl>
-                        <Input placeholder="https://example.com/image.jpg" {...field} />
+                        <Input placeholder="https://example.com/image.jpg" className="dark:bg-gray-700 dark:border-gray-600" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -212,7 +212,7 @@ export default function AddItemModal({ open, onOpenChange, onSuccess }: AddItemM
                       <FormControl>
                         <Textarea 
                           placeholder="A cute pink Dimoo with strawberry theme" 
-                          className="resize-none" 
+                          className="resize-none dark:bg-gray-700 dark:border-gray-600" 
                           {...field} 
                         />
                       </FormControl>
@@ -227,16 +227,17 @@ export default function AddItemModal({ open, onOpenChange, onSuccess }: AddItemM
                   control={form.control}
                   name="forTrade"
                   render={({ field }) => (
-                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border dark:border-gray-600 p-4 dark:bg-gray-700/30">
                       <FormControl>
                         <Checkbox
                           checked={field.value}
                           onCheckedChange={field.onChange}
+                          className="dark:border-gray-500"
                         />
                       </FormControl>
                       <div className="space-y-1 leading-none">
                         <FormLabel>Available for Trade</FormLabel>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-sm text-muted-foreground dark:text-gray-400">
                           Make this collectible available for trading with other collectors
                         </p>
                       </div>
@@ -252,13 +253,14 @@ export default function AddItemModal({ open, onOpenChange, onSuccess }: AddItemM
                 variant="outline" 
                 onClick={() => onOpenChange(false)}
                 disabled={isSubmitting}
+                className="dark:border-gray-600 dark:hover:bg-gray-700"
               >
                 Cancel
               </Button>
               <Button 
                 type="submit"
                 disabled={isSubmitting}
-                className="bg-pop-pink hover:bg-opacity-90"
+                className="bg-pop-pink dark:bg-brand-dark hover:bg-opacity-90"
               >
                 {isSubmitting ? "Adding..." : "Add to Collection"}
               </Button>

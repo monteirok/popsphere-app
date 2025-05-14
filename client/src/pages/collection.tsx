@@ -12,7 +12,11 @@ export default function Collection() {
   const [seriesFilter, setSeriesFilter] = useState("all");
   
   if (!user) {
-    return <div>Please log in to view your collection.</div>;
+    return (
+      <div className="flex justify-center items-center h-64 bg-white dark:bg-gray-800 rounded-custom p-6 shadow-soft dark:shadow-soft-dark">
+        <p className="text-lg text-gray-600 dark:text-gray-300">Please log in to view your collection.</p>
+      </div>
+    );
   }
   
   return (

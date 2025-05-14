@@ -56,7 +56,7 @@ export default function CollectionItemCard({ collectible }: CollectionItemCardPr
             className="w-full h-full object-cover"
           />
           {collectible.series && (
-            <div className="absolute top-2 right-2 bg-pop-pink text-white text-xs px-1.5 py-0.5 rounded-full">
+            <div className="absolute top-2 right-2 bg-pop-pink dark:bg-brand-dark text-white text-xs px-1.5 py-0.5 rounded-full">
               {collectible.series}
             </div>
           )}
@@ -71,17 +71,17 @@ export default function CollectionItemCard({ collectible }: CollectionItemCardPr
         <div className="item-actions opacity-0 group-hover:opacity-100 absolute inset-0 bg-black bg-opacity-50 rounded-custom flex items-center justify-center space-x-2 transition-opacity">
           <button 
             onClick={() => setShowTradeModal(true)}
-            className="bg-white text-dark-grey rounded-full w-9 h-9 flex items-center justify-center hover:bg-pop-pink hover:text-white transition"
+            className="bg-white dark:bg-gray-800 text-dark-grey dark:text-gray-200 rounded-full w-9 h-9 flex items-center justify-center hover:bg-pop-pink dark:hover:bg-brand-dark hover:text-white transition"
           >
             <RefreshCw className="h-4 w-4" />
           </button>
           <button 
             onClick={() => setShowDetails(true)}
-            className="bg-white text-dark-grey rounded-full w-9 h-9 flex items-center justify-center hover:bg-pop-pink hover:text-white transition"
+            className="bg-white dark:bg-gray-800 text-dark-grey dark:text-gray-200 rounded-full w-9 h-9 flex items-center justify-center hover:bg-pop-pink dark:hover:bg-brand-dark hover:text-white transition"
           >
             <Pencil className="h-4 w-4" />
           </button>
-          <button className="bg-white text-dark-grey rounded-full w-9 h-9 flex items-center justify-center hover:bg-pop-pink hover:text-white transition">
+          <button className="bg-white dark:bg-gray-800 text-dark-grey dark:text-gray-200 rounded-full w-9 h-9 flex items-center justify-center hover:bg-pop-pink dark:hover:bg-brand-dark hover:text-white transition">
             <MoreHorizontal className="h-4 w-4" />
           </button>
         </div>
@@ -89,10 +89,10 @@ export default function CollectionItemCard({ collectible }: CollectionItemCardPr
 
       {/* Details Dialog */}
       <Dialog open={showDetails} onOpenChange={setShowDetails}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[425px] dark:bg-gray-800 dark:border-gray-700">
           <DialogHeader>
             <DialogTitle>{collectible.name}</DialogTitle>
-            <DialogDescription>{collectible.variant}</DialogDescription>
+            <DialogDescription className="dark:text-gray-400">{collectible.variant}</DialogDescription>
           </DialogHeader>
           
           <div className="flex flex-col space-y-4">
@@ -123,7 +123,7 @@ export default function CollectionItemCard({ collectible }: CollectionItemCardPr
             {collectible.description && (
               <div className="text-sm">
                 <div className="font-semibold mb-1">Description:</div>
-                <p className="text-gray-700">{collectible.description}</p>
+                <p className="text-gray-700 dark:text-gray-300">{collectible.description}</p>
               </div>
             )}
           </div>
@@ -132,10 +132,11 @@ export default function CollectionItemCard({ collectible }: CollectionItemCardPr
             <Button
               variant="outline"
               onClick={() => toggleForTrade()}
+              className="dark:border-gray-600 dark:hover:bg-gray-700"
             >
               {collectible.forTrade ? "Remove from Trades" : "Make Available for Trade"}
             </Button>
-            <Button onClick={() => setShowTradeModal(true)}>
+            <Button onClick={() => setShowTradeModal(true)} className="bg-pop-pink dark:bg-brand-dark hover:bg-opacity-90">
               Propose Trade
             </Button>
           </DialogFooter>
