@@ -25,12 +25,18 @@ export default function TradeModal({ open, onOpenChange, offeredCollectible }: T
   const [message, setMessage] = useState("");
   const [selectedUser, setSelectedUser] = useState<string>("");
   const [selectedCollectible, setSelectedCollectible] = useState<string>("");
+  const [selectedUserCollectible, setSelectedUserCollectible] = useState<string>("");
   
   // Fetch all collectibles available for trade
   const { data: tradeCollectibles = [], isLoading: isLoadingCollectibles } = useQuery<any[]>({
     queryKey: ["/api/collectibles?forTrade=true"],
     enabled: open,
   });
+  
+  // Get the current user's collectibles that are available for trade
+  const userCollectibles = tradeCollectibles.filter(
+    (collectible) => collectible.userId === user?.id
+  );
   
   // Filter out the current user's collectibles and the offered collectible
   const otherUserCollectibles = tradeCollectibles.filter(
@@ -80,7 +86,8 @@ export default function TradeModal({ open, onOpenChange, offeredCollectible }: T
   });
   
   const handleSubmit = () => {
-    if (!offeredCollectible) {
+    // If we don't have an offered collectible, we need a selected user collectible
+    if (!offeredCollectible && !selectedUserCollectible) {
       toast({
         title: "Missing collectible",
         description: "Please select a collectible to offer for trade.",
@@ -111,8 +118,13 @@ export default function TradeModal({ open, onOpenChange, offeredCollectible }: T
       return;
     }
     
+    // Use either the provided offeredCollectible or the selected user collectible
+    const proposerCollectibleId = offeredCollectible 
+      ? offeredCollectible.id 
+      : parseInt(selectedUserCollectible);
+    
     createTrade({
-      proposerCollectibleId: offeredCollectible.id,
+      proposerCollectibleId,
       receiverId: receiverCollectible.userId,
       receiverCollectibleId: receiverCollectible.id,
       message: message,
@@ -142,6 +154,14 @@ export default function TradeModal({ open, onOpenChange, offeredCollectible }: T
                   className="w-full h-full object-cover"
                 />
               </div>
+            ) : selectedUserCollectible && userCollectibles.find(c => c.id.toString() === selectedUserCollectible) ? (
+              <div className="w-24 h-24 mx-auto rounded-custom overflow-hidden border-2 border-pop-pink">
+                <img 
+                  src={userCollectibles.find(c => c.id.toString() === selectedUserCollectible)?.image} 
+                  alt={userCollectibles.find(c => c.id.toString() === selectedUserCollectible)?.name} 
+                  className="w-full h-full object-cover"
+                />
+              </div>
             ) : (
               <div className="w-24 h-24 mx-auto bg-gray-100 rounded-custom flex items-center justify-center border-2 border-dashed border-gray-200">
                 <span className="text-gray-400 text-sm">Select an item</span>
@@ -151,6 +171,16 @@ export default function TradeModal({ open, onOpenChange, offeredCollectible }: T
               <div className="mt-2 text-xs">
                 <p className="font-medium">{offeredCollectible.name}</p>
                 <p className="text-gray-500">{offeredCollectible.variant}</p>
+              </div>
+            )}
+            {!offeredCollectible && selectedUserCollectible && userCollectibles.find(c => c.id.toString() === selectedUserCollectible) && (
+              <div className="mt-2 text-xs">
+                <p className="font-medium">
+                  {userCollectibles.find(c => c.id.toString() === selectedUserCollectible)?.name}
+                </p>
+                <p className="text-gray-500">
+                  {userCollectibles.find(c => c.id.toString() === selectedUserCollectible)?.variant}
+                </p>
               </div>
             )}
           </div>
@@ -194,6 +224,24 @@ export default function TradeModal({ open, onOpenChange, offeredCollectible }: T
           </div>
         ) : (
           <div className="space-y-4">
+            {!offeredCollectible && userCollectibles.length > 0 && (
+              <div>
+                <label className="block text-sm font-medium mb-1">Your Collectible for Trade</label>
+                <Select value={selectedUserCollectible} onValueChange={setSelectedUserCollectible}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choose one of your collectibles" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {userCollectibles.map((collectible) => (
+                      <SelectItem key={collectible.id} value={collectible.id.toString()}>
+                        {collectible.name} - {collectible.variant}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            
             <div>
               <label className="block text-sm font-medium mb-1">Select Collector</label>
               <Select value={selectedUser} onValueChange={handleUserChange}>
@@ -251,7 +299,7 @@ export default function TradeModal({ open, onOpenChange, offeredCollectible }: T
           </Button>
           <Button
             onClick={handleSubmit}
-            disabled={!offeredCollectible || !selectedCollectible || isPending}
+            disabled={(!offeredCollectible && !selectedUserCollectible) || !selectedCollectible || isPending}
             className="bg-pop-pink hover:bg-opacity-90 text-white"
           >
             {isPending ? "Sending..." : "Send Trade Request"}
