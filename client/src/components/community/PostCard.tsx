@@ -125,7 +125,7 @@ export default function PostCard({ post }: PostCardProps) {
   };
   
   return (
-    <div className="mb-4 pb-4 border-b border-gray-100">
+    <div className="mb-4 pb-4 border-b border-gray-100 dark:border-gray-800">
       <div className="flex items-center mb-3">
         <AvatarWithStatus
           src={post.user?.profileImage || ""}
@@ -134,7 +134,7 @@ export default function PostCard({ post }: PostCardProps) {
         />
         <div>
           <p className="font-medium text-sm">{post.user?.username === user?.username ? "You" : post.user?.displayName || "Unknown User"}</p>
-          <p className="text-xs text-gray-500">{formatDate(post.createdAt)}</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">{formatDate(post.createdAt)}</p>
         </div>
         
         {post.user?.id === user?.id && (
@@ -172,7 +172,7 @@ export default function PostCard({ post }: PostCardProps) {
         </div>
       )}
       
-      <div className="flex items-center justify-between text-xs text-gray-500">
+      <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
         <div className="flex items-center">
           <button 
             onClick={() => toggleLike()}
@@ -191,7 +191,7 @@ export default function PostCard({ post }: PostCardProps) {
       
       {showComments && (
         <div className="mt-3">
-          <div className="p-2 bg-gray-50 rounded-custom">
+          <div className="p-2 bg-gray-50 dark:bg-gray-900 rounded-custom">
             {isLoadingComments ? (
               <p className="text-center text-xs py-2">Loading comments...</p>
             ) : (comments as any[]).length > 0 ? (
@@ -203,7 +203,7 @@ export default function PostCard({ post }: PostCardProps) {
                       alt={comment.user?.displayName || "User"}
                       className="w-6 h-6 rounded-full"
                     />
-                    <div className="bg-white p-2 rounded-lg text-xs flex-grow">
+                    <div className="bg-white dark:bg-gray-800 p-2 rounded-lg text-xs flex-grow">
                       <p className="font-medium">{comment.user?.displayName || "Unknown User"}</p>
                       <p>{comment.content}</p>
                     </div>
@@ -219,13 +219,13 @@ export default function PostCard({ post }: PostCardProps) {
                 value={commentText}
                 onChange={(e) => setCommentText(e.target.value)}
                 placeholder="Add a comment..."
-                className="text-xs min-h-[32px] resize-none rounded-l-full rounded-r-none border-r-0"
+                className="text-xs min-h-[32px] resize-none rounded-l-full rounded-r-none border-r-0 dark:bg-gray-800 dark:border-gray-700"
               />
               <Button 
                 type="submit" 
                 disabled={commentText.trim() === "" || isAddingComment}
                 size="sm"
-                className="rounded-l-none rounded-r-full bg-pop-pink"
+                className="rounded-l-none rounded-r-full bg-pop-pink dark:bg-brand-dark"
               >
                 <Send className="h-4 w-4" />
               </Button>
@@ -261,10 +261,10 @@ export default function PostCard({ post }: PostCardProps) {
                     alt={comment.user.displayName}
                     className="w-8 h-8 rounded-full"
                   />
-                  <div className="bg-gray-50 p-3 rounded-lg text-sm flex-grow">
+                  <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg text-sm flex-grow">
                     <p className="font-medium">{comment.user.displayName}</p>
                     <p>{comment.content}</p>
-                    <p className="text-xs text-gray-500 mt-1">{formatDate(comment.createdAt)}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{formatDate(comment.createdAt)}</p>
                   </div>
                 </div>
               ))
@@ -278,12 +278,12 @@ export default function PostCard({ post }: PostCardProps) {
               value={commentText}
               onChange={(e) => setCommentText(e.target.value)}
               placeholder="Add a comment..."
-              className="text-sm resize-none rounded-l-lg rounded-r-none border-r-0"
+              className="text-sm resize-none rounded-l-lg rounded-r-none border-r-0 dark:bg-gray-800 dark:border-gray-700"
             />
             <Button 
               type="submit" 
               disabled={commentText.trim() === "" || isAddingComment}
-              className="rounded-l-none rounded-r-lg bg-pop-pink"
+              className="rounded-l-none rounded-r-lg bg-pop-pink dark:bg-brand-dark"
             >
               <Send className="h-4 w-4" />
             </Button>
