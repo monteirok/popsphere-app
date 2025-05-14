@@ -368,6 +368,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create the trade
       const trade = await storage.createTrade(result.data);
       
+      // Create a notification for the receiver
+      await createTradeRequestNotification(trade.id, user.id, result.data.receiverId);
+      
       // Get the full trade with details
       const tradeWithDetails = await storage.getTradeWithDetails(trade.id);
       

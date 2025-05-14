@@ -225,9 +225,9 @@ interface NavLinkProps {
 function NavLink({ href, active, children }: NavLinkProps) {
   return (
     <Link href={href}>
-      <a className={`px-4 py-3 font-medium flex items-center ${active ? 'tab-active text-pop-pink' : 'text-gray-600 hover:text-pop-pink'}`}>
+      <div className={`px-4 py-3 font-medium flex items-center cursor-pointer ${active ? 'tab-active text-pop-pink' : 'text-gray-600 hover:text-pop-pink'}`}>
         {children}
-      </a>
+      </div>
     </Link>
   );
 }
