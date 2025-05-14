@@ -228,7 +228,7 @@ export default function Profile() {
           
           <div className="flex-1 text-center md:text-left">
             <h1 className="text-2xl font-bold">{profileUser?.displayName}</h1>
-            <p className="text-gray-500">@{profileUser?.username}</p>
+            <p className="text-gray-500 dark:text-gray-400">@{profileUser?.username}</p>
             
             {profileUser?.bio && (
               <p className="mt-2 text-sm">{profileUser.bio}</p>
@@ -237,14 +237,14 @@ export default function Profile() {
             <div className="flex flex-wrap justify-center md:justify-start mt-3 gap-4">
               <div className="text-center">
                 <div className="text-lg font-bold">{collectibles.length}</div>
-                <div className="text-xs text-gray-500">Collectibles</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">Collectibles</div>
               </div>
               <div 
                 className="text-center cursor-pointer hover:opacity-80 transition-opacity"
                 onClick={() => setIsFollowersModalOpen(true)}
               >
                 <div className="text-lg font-bold">{followers.length}</div>
-                <div className="text-xs text-gray-500">Followers</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">Followers</div>
               </div>
               <div 
                 className="text-center cursor-pointer hover:opacity-80 transition-opacity"
@@ -351,7 +351,7 @@ export default function Profile() {
       </div>
       
       <Tabs defaultValue="collection" className="w-full">
-        <div className="bg-white rounded-custom p-4 shadow-soft mb-6">
+        <div className="bg-white dark:bg-gray-800 rounded-custom p-4 shadow-soft mb-6">
           <TabsList className="w-full justify-start bg-transparent space-x-2 p-0">
             <TabsTrigger 
               value="collection" 
@@ -391,7 +391,7 @@ export default function Profile() {
         </div>
         
         <TabsContent value="collection" className="mt-0">
-          <div className="bg-white rounded-custom p-4 shadow-soft">
+          <div className="bg-white dark:bg-gray-800 rounded-custom p-4 shadow-soft">
             <h2 className="text-xl font-bold mb-4">Collection</h2>
             
             {isLoadingCollectibles ? (
@@ -416,7 +416,7 @@ export default function Profile() {
         </TabsContent>
         
         <TabsContent value="posts" className="mt-0">
-          <div className="bg-white rounded-custom p-4 shadow-soft">
+          <div className="bg-white dark:bg-gray-800 rounded-custom p-4 shadow-soft">
             <h2 className="text-xl font-bold mb-4">Posts</h2>
             
             {isLoadingPosts ? (
@@ -442,7 +442,7 @@ export default function Profile() {
         
         {isOwnProfile && (
           <TabsContent value="trades" className="mt-0">
-            <div className="bg-white rounded-custom p-4 shadow-soft">
+            <div className="bg-white dark:bg-gray-800 rounded-custom p-4 shadow-soft">
               <h2 className="text-xl font-bold mb-4">Trades</h2>
               
               {isLoadingTrades ? (
@@ -481,7 +481,7 @@ export default function Profile() {
         )}
         
         <TabsContent value="following" className="mt-0">
-          <div className="bg-white rounded-custom p-4 shadow-soft">
+          <div className="bg-white dark:bg-gray-800 rounded-custom p-4 shadow-soft">
             <h2 className="text-xl font-bold mb-4">Following</h2>
             
             {isLoadingFollowing ? (
