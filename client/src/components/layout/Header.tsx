@@ -9,6 +9,7 @@ import { useAuth } from "../../hooks/use-auth";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "../../lib/queryClient";
 import NotificationDropdown from "../notification/NotificationDropdown";
+import { ThemeToggle } from "../ui/theme-toggle";
 
 // Define the user interface for search results
 interface SearchUser {
@@ -168,6 +169,7 @@ export default function Header() {
           </Button>
           <NotificationDropdown />
           <MessageSquare className="h-6 w-6 text-dark-grey cursor-pointer" />
+          <ThemeToggle />
           
           {user && (
             <Link href="/profile">

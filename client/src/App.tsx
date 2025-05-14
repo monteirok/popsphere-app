@@ -8,7 +8,6 @@ import Profile from "./pages/profile";
 import AuthPage from "./pages/auth-page";
 import Header from "./components/layout/Header";
 import MobileNavigation from "./components/layout/MobileNavigation";
-import { ThemeToggleFloat } from "./components/theme-toggle-float";
 import { useAuth } from "./hooks/use-auth";
 import { Loader2 } from "lucide-react";
 
@@ -51,9 +50,6 @@ function App() {
           </Route>
         </Switch>
       )}
-      
-      {/* Floating theme toggle button */}
-      <ThemeToggleFloat />
     </div>
   );
 }
