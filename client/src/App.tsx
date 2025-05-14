@@ -23,7 +23,7 @@ function App() {
   }
   
   return (
-    <div className="bg-gray-50 min-h-screen flex flex-col">
+    <div className="bg-gray-50 dark:bg-gray-950 min-h-screen flex flex-col">
       {user ? (
         // Authenticated layout
         <>
