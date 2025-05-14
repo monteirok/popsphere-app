@@ -10,7 +10,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "../../components/ui/card";
 import {
   Form,
   FormControl,
@@ -18,10 +18,10 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { useAuth } from "@/hooks/use-auth";
+} from "../../components/ui/form";
+import { Input } from "../../components/ui/input";
+import { Button } from "../../components/ui/button";
+import { useAuth } from "../../hooks/use-auth";
 
 const loginSchema = z.object({
   username: z.string().min(1, "Username is required"),
@@ -101,10 +101,8 @@ export default function Login() {
         <CardFooter className="flex flex-col space-y-2">
           <div className="text-center text-sm">
             Don't have an account?{" "}
-            <Link href="/register">
-              <a className="text-pop-pink hover:underline font-medium">
-                Sign up
-              </a>
+            <Link href="/register" className="text-pop-pink hover:underline font-medium">
+              Sign up
             </Link>
           </div>
           
